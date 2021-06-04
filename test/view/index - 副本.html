@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <link rel="stylesheet" href="../2dSdk/HG2DMap.min.css">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">
+    <style>
+        #map {
+            border: 1px solid pink;
+            margin: 10px auto;
+        }
+        
+        .popover-content {
+            padding-bottom: 0;
+        }
+        
+        .popover {
+            min-width: 200px;
+        }
+        /* 信息弹出框的样式 */
+        
+        .hg-info-box {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 1);
+            -webkit-filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+            filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            bottom: 30px;
+            left: -70px;
+            width: max-content;
+            display: none;
+        }
+        
+        .hg-info-box::after,
+        .hg-info-box::before {
+            top: 100%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+        
+        .hg-info-box::after {
+            border-top-color: rgba(255, 255, 255, 0.7);
+            border-width: 10px;
+            left: 50%;
+            margin-left: -10px;
+        }
+        
+        .hg-info-box::before {
+            border-top-color: rgba(255, 255, 255, 0.7);
+            border-width: 11px;
+            left: 50%;
+            margin-left: -11px;
+        }
+        
+        .hg-info-box h5 {
+            margin: 0;
+            text-align: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div>
+            <el-steps :active="active" finish-status="success">
+                <el-step title="选择文件"></el-step>
+                <el-step title="确定长宽"></el-step>
+                <el-step title="建立坐标"></el-step>
+                <el-step title="上传地图"></el-step>
+            </el-steps>
+
+        </div>
+        <el-input-number :controls="false" v-model="myParams.map_width" :min="1" :max="999999" label="地图长度(m)"></el-input-number>
+        <el-input-number :controls="false" v-model="myParams.map_height" :min="1" :max="999999" label="地图宽度(m)"></el-input-number>
+
+        <el-button @click="cl_click" size="small">测量</el-button>
+        请输入线的实际长度
+        <el-input-number :controls="false" v-model="myParams.real_length" :min="1" :max="999999" label="地图宽度(m)"></el-input-number>
+        <el-button @click="cl_ok_click" size="small">确定（测量）</el-button>
+
+
+
+
+        确定测量后：请点击选择一个点并输入地图偏移量(横为x轴，纵为y轴)
+        <el-input-number :controls="false" v-model="myParams.coordinate_origin_x" :min="1" :max="999999" label="x(m)"></el-input-number>
+        <el-input-number :controls="false" v-model="myParams.coordinate_origin_y" :min="1" :max="999999" label="y(m)"></el-input-number>
+
+        <div>
+            <el-button :disabled="!isPro" :class="['type-btn']" size="small" @click="changeMap">{{ mapData.attId ? '更换地图' : '添加地图' }}</el-button>
+
+            <el-button :disabled="!isPro || !mapData.attId" :class="['type-btn']" size="small" title="标定坐标模式：在图中点击鼠标左键标定控制点位" @click.native="($event)=>{addSB($event,'../img/location0.png','标定坐标',{'type':'标定坐标',id:1234})}">标定坐标</el-button>
+            <el-button :disabled="!isPro" :class="['type-btn']" size="small" title="绘制区域模式：在地图上面单击鼠标左键开始绘制，依次选定点位，右键结束绘制" @click="drawPolygon">绘制区域</el-button>
+
+            <el-button :disabled="!isPro" :class="['type-btn']" size="small">区域准入管理</el-button>
+
+            <el-button :disabled="!isPro" :class="['type-btn']" size="small" title="配置资源模式：该模式中对硬件资源进行配置" @click.native="($event)=>{addSB($event,'../img/camera.png','摄像头',{'type':'摄像头',id:1235})}">配置资源</el-button>
+
+
+        </div>
+        <div ref="map" id="map" :style="{
+            'height':mapData.mapHeight+'px',
+            'width':mapData.mapWidth+'px',
+        }">
+            <!--弹出信息放置的容器-->
+            <div id="popup" class="hg-info-box"></div>
+        </div>
+
+    </div>
+
+    <script src="../2dSdk/HG2DMap.min.js"></script>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+    <script>
+        let mixins = {
+            filters: {
+                myTime: function(val, fmt) {
+                    var Dates = new Date(parseInt(val));
+                    var o = {
+                        'M+': Dates.getMonth() + 1,
+                        'd+': Dates.getDate(),
+                        'h+': Dates.getHours(),
+                        'm+': Dates.getMinutes(),
+                        's+': Dates.getSeconds(),
+                        'q+': Math.floor((Dates.getMonth() + 3) / 3),
+                        'S+': Dates.getMilliseconds()
+                    }
+                    if (/(y+)/.test(fmt)) {
+                        fmt = fmt.replace(RegExp.$1, (Dates.getFullYear() + '').substring(4 - RegExp.$1.length))
+                    }
+                    for (var k in o) {
+                        if (o.hasOwnProperty(k)) {
+                            if (new RegExp('(' + k + ')').test(fmt)) {
+                                fmt = fmt.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ('00' + o[k]).substring(('' + o[k]).length))
+                            }
+                        }
+                    }
+                    return fmt;
+                }
+            },
+            methods: {
+                //自适应缩放比
+                mapAutomaticSetting(map_zoom, x, y, times, extend, map_div) {
+                    var obj = {};
+                    // 如果缩放比为空
+                    if (map_zoom == 0) {
+                        var map_x = parseFloat(Math.abs(parseFloat(extend[2]) - parseFloat(extend[0]))); // 得到地图文件的宽
+                        var map_y = parseFloat(Math.abs(parseFloat(extend[3]) - parseFloat(extend[0]))); // 得到地图文件的高
+                        var div_x = parseFloat($("#" + map_div).width()); // 得到显示地图的div的宽
+                        var div_y = parseFloat($("#" + map_div).height()); // 得到显示地图的div的高
+                        var max_x = parseFloat(div_x / (map_x * 73)); // 当缩放比为40时，地图1m对应像素值73px,当缩放比加1，对应像素值增加1.5倍。max_x为对应像素值还需要增加或减少多少倍才能等于div的宽度
+                        var max_y = parseFloat(div_y / (map_y * 73)); // max_y 同理max_x
+                        var zoom_x = Math.log(max_x) / Math.log(1.5); // 求出地图宽的对应像素值需要增加或减少的倍数值,1.5为地图的缩放比系数zoom_factor,详情可参考2dSDK文档
+                        var zoom_y = Math.log(max_y) / Math.log(1.5); // 高与宽同理
+                        obj.zoom = parseFloat(40 + Math.min(zoom_x, zoom_y)).toFixed(2); // 40加上或减去倍数，就是最合适的缩放比
+                    } else {
+                        obj.zoom = parseFloat(map_zoom);
+                    }
+                    // 如果中心视点为空
+                    var center_x, center_y, times_drag;
+                    if (x == null) {
+                        // 以地图文件的坐标系为原点算出地图文件的中心视点的x值
+                        center_x = parseFloat(((parseFloat(extend[2]) - parseFloat(extend[0])) / 2 + parseFloat(extend[0])).toFixed(2));
+                    } else {
+                        center_x = parseFloat(x);
+                    }
+                    if (y == null) {
+                        // 以地图文件的坐标系为原点算出地图文件的中心视点的y值
+                        center_y = parseFloat(((parseFloat(extend[3]) - parseFloat(extend[1])) / 2 + parseFloat(extend[1])).toFixed(2));
+                    } else {
+                        center_y = parseFloat(y);
+                    }
+                    obj.center = [center_x, center_y];
+                    // 如果拖拽倍数为空
+                    if (times == null) {
+                        // 拖拽倍数设为1
+                        times_drag = 1;
+                    } else {
+                        times_drag = parseFloat(times);
+                    }
+                    // 计算出限制地图离中心视点拖拽的距离(地图文件宽和高的times_drag倍)的坐标
+                    var extent = [center_x - times_drag * Math.abs((parseFloat(extend[2]) - parseFloat(extend[0]))), center_y - times_drag * Math.abs((parseFloat(extend[3]) - parseFloat(extend[1]))), center_x + times_drag * Math.abs((parseFloat(extend[2]) - parseFloat(extend[0]))), center_y + times_drag * Math.abs((parseFloat(extend[3]) - parseFloat(extend[1])))];
+                    obj.extent = extent;
+                    return obj;
+                },
+                myTime: function(val, fmt) {
+                    var Dates = new Date(parseInt(val));
+                    var o = {
+                        'M+': Dates.getMonth() + 1,
+                        'd+': Dates.getDate(),
+                        'h+': Dates.getHours(),
+                        'm+': Dates.getMinutes(),
+                        's+': Dates.getSeconds(),
+                        'q+': Math.floor((Dates.getMonth() + 3) / 3),
+                        'S+': Dates.getMilliseconds()
+                    }
+                    if (/(y+)/.test(fmt)) {
+                        fmt = fmt.replace(RegExp.$1, (Dates.getFullYear() + '').substring(4 - RegExp.$1.length))
+                    }
+                    for (var k in o) {
+                        if (o.hasOwnProperty(k)) {
+                            if (new RegExp('(' + k + ')').test(fmt)) {
+                                fmt = fmt.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ('00' + o[k]).substring(('' + o[k]).length))
+                            }
+                        }
+                    }
+                    return fmt;
+                },
+                /*显示聚类人数*/
+                clusterTextFunction(feature) {
+                    var features = feature.get('features');
+                    var size = features.length;
+                    return size.toString() + "人";
+                },
+                /*设置聚类图标的半径*/
+                radiusFunction(feature) {
+                    var features = feature.get('features');
+                    var size = features.length;
+                    return (20 + size / 2);
+                },
+                /*
+                 绘制区域图形转字符串
+                */
+                fromArrayGetString(array) {
+                    var string = array.join(" ");
+                    return string;
+                }
+            }
+        }
+        var vm = new Vue({
+            el: '#app',
+            mixins: [mixins],
+            data() {
+                return {
+                    active: 2,
+                    cl_pointers: [],
+                    myParams: {
+                        map_width: 0,
+                        map_height: 0,
+                        coordinate_origin_x: 0,
+                        coordinate_origin_y: 0,
+                        real_length: 0
+                    },
+
+
+                    showcardId: [],
+                    personArr: [],
+                    switchArr: [],
+
+                    MY_POPUP: null,
+                    ICON_SCALE: 1, // 当地图缩放时，地图上的图标需要缩放的比例值
+                    TEXT_SCALE: 1, // 当地图缩放时，地图上的图标的字需要缩放的比例值
+                    isPro: true,
+                    DRAW: null,
+                    mapData: {
+                        MOVE_DATA: null,
+                        MOVE_IMG: '', //添加移动图片
+                        MOVE_TEXT: '', //添加移动说明文字
+                        MOVE_FEATURE: null, // 新增摄像头时，随鼠标移动的摄像头图标对象
+                        MOVE_LOCATION_X: 0, // 移动的摄像头图标对象的x坐标
+                        MOVE_LOCATION_Y: 0, // 移动的摄像头图标对象的y坐标
+                        ADD_DRAW_ID: -100, // 初始化自定义区域的id
+                        ADD_DRAW_NUM: 0, // 初始化自定义区域的数量
+                        EVACUATE_TMP_AREA: {}, // 保存所有自定义区域的信息
+                        DRAW_ID_LIST: [], // 保存自定义区域的id
+                        attId: 'xx',
+                        CARD_ID: {}, // 地图上已有的所有定位卡号
+                        mapHeight: 800,
+                        mapWidth: 1400,
+                        MY_MAP: null,
+                        MAP_URL: '',
+                        areasData: [{
+                            pointers: [
+                                [10, 10],
+                                [30, 0],
+                                [30, 30],
+                                [10, 230]
+                            ],
+                            id: 1,
+                            color: 'red',
+                            name: '危险'
+                        }, {
+                            pointers: [
+                                [20, 10],
+                                [130, 110],
+                                [240, 30],
+                                [10, 230]
+                            ],
+                            id: 2,
+                            color: 'blue',
+                            name: '安全'
+                        }],
+                        persionsData: [{
+                            pointers: [23, 45],
+                            name: 'xxx',
+                            id: 1
+                        }, {
+                            pointers: [123, 25],
+                            name: 'xxx',
+                            id: 2
+                        }, {
+                            pointers: [33, 55],
+                            name: 'xxx',
+                            id: 3
+                        }, {
+                            pointers: [133, 75],
+                            name: 'xxx',
+                            id: 4
+                        }]
+                    },
+                    bgImg: 'test.png'
+                }
+            },
+            mounted: function() {
+                this.mapInit('test.png')
+
+                //this.mapInit('xx.jpg')
+                this.getDataInter()
+                window.onresize = () => {
+                    this.initSize();
+                }
+                document.addEventListener('keyup', (e) => {
+                    if (e.keyCode == 27) {
+                        this.canceDraw(e)
+                    }
+                })
+            },
+            methods: {
+                cl_ok_click() {
+                    var x = Math.abs(this.cl_pointers[0][0] - this.cl_pointers[1][0]);
+                    var y = Math.abs(this.cl_pointers[0][1] - this.cl_pointers[1][1]);
+                    // 得到地图实际的长宽
+
+                    this.myParams.map_width = ((this.myParams.real_length / Math.sqrt((x * x + y * y))) * this.mapData.mapWidth).toFixed(2)
+                    this.myParams.map_height = ((this.myParams.real_length / Math.sqrt((x * x + y * y))) * this.mapData.mapHeight).toFixed(2)
+
+
+                    this.clearDraw()
+                    this.getMapOption().then(({
+                        obj,
+                        extend
+                    }) => {
+                        this.mapData.MY_MAP = new HG2DMap.map(this.mapData.URL, "map", obj.center, obj.zoom, 'image', extend, {
+                            extent: obj.extent,
+                            zoom_factor: 1.5
+                        });
+
+                        this.mapData.MY_MAP.getTarget().style.cursor = "pointer";
+                        this.mapData.MY_MAP.on("click", this.sureLocation);
+                    })
+                },
+                sureLocation(e) {
+                    if (e.dragging) {
+                        return;
+                    }
+                    // 得到鼠标点击地图时的像素点
+                    var pixel = this.mapData.MY_MAP.getEventPixel(e.originalEvent);
+                    // 得到该像素点的坐标
+                    let LOCATION_X = this.mapData.MY_MAP.getCoordinateFromPixel(pixel)[0];
+                    let LOCATION_Y = this.mapData.MY_MAP.getCoordinateFromPixel(pixel)[1];
+                    this.mapData.MY_MAP.removeAllCard();
+                    this.mapData.MY_MAP.addCardInfo(1, "../img/icon/mapLocation.png", LOCATION_X, LOCATION_Y, " ");
+                },
+                getMapOption() {
+                    return new Promise((resove, reject) => {
+                        let extend = [0, 0, this.mapData.mapWidth, this.mapData.mapHeight]; // 默认设置地图中心为0,0
+                        let obj = this.mapAutomaticSetting(0, null, null, 2, extend, "map"); // 调用函数计算缩放比、中心视点
+                        resove({
+                            obj,
+                            extend
+                        })
+                    })
+                },
+                //点击地图测量长宽
+                cl_click() {
+
+
+
+                    // 移除地图所有添加的元素
+                    this.mapData.MY_MAP.removeAllFeature();
+
+                    this.getMapOption().then(({
+                        obj,
+                        extend
+                    }) => {
+                        debugger
+                        // 调用2d地图sdk初始化图片地图文件
+                        this.mapData.MY_MAP = new HG2DMap.map(this.mapData.URL, "map", obj.center, obj.zoom, 'image', extend, {
+                            extent: obj.extent,
+                            zoom_factor: 1.5
+                        });
+                        this.clearDraw()
+
+                        // 调用2d地图sdk绘制线条
+                        this.DRAW = new HG2DMap.draw.line({
+                            max_point: 2
+                        });
+                        // 将绘制对象添加到地图VIEW_MAP上
+                        this.mapData.MY_MAP.addInteraction(this.DRAW);
+                        this.DRAW.on("drawend", (e) => {
+                            // 得到绘制线条的起点和终点坐标
+                            this.cl_pointers = e.feature.getGeometry().getCoordinates();
+                            console.log(this.cl_pointers)
+                            var feature = new HG2DMap.feature.line(this.cl_pointers);
+                            this.mapData.MY_MAP.addFeature(feature);
+                            this.mapData.MY_MAP.removeInteraction(this.DRAW);
+
+                        });
+                    })
+
+
+                },
+                clearDraw() {
+                    if (this.DRAW) {
+                        this.mapData.MY_MAP.removeInteraction(this.DRAW);
+                    }
+                },
+                getDataInter() {
+                    let timer = setInterval(() => {
+                        this.getData()
+                    }, 1000)
+                    this.$once('hook:beforeDestroy', () => {
+                        clearInterval(timer)
+                        timer = null;
+                    })
+                },
+                initSize() {
+                    let ClientRect = this.$refs.map.getBoundingClientRect();
+                    this.mapData.mapWidth = ClientRect.right - ClientRect.left
+                    this.mapData.mapHeight = ClientRect.bottom - ClientRect.top
+                    this.mapData.MY_MAP.updateSize()
+                },
+                getData() {
+                    $.ajax({
+                        url: 'http://10.1.7.140:9066/bwss-web2/bg/position/queryList.html',
+                        type: 'POST',
+                        data: {
+                            type: 'operType',
+                            proId: 'd1e8469d9c554f2d89b7976e144a8498'
+                        },
+                        success: (e) => {
+                            let data = JSON.parse(e);
+                            console.log(data.obj)
+                            this.doData(data.obj || [])
+                        }
+                    })
+                },
+                doData(Arr) {
+                    var tempArr = [];
+                    var tempPerce = 0;
+                    var switchArr = [];
+                    var sum = 0;
+                    if (Arr && Arr.length) {
+                        Arr.forEach((item) => {
+                            if (item.data.length) {
+                                sum += item.data.length;
+                                switchArr.push(item.name);
+                                for (var i = 0; i < item.data.length; i++) {
+                                    item.data[i].timeStr = this.myTime(item.data[i].time, 'yyyy-MM-dd hh:mm:ss')
+                                }
+                                tempArr.push({
+                                    label: item.name,
+                                    child: item.data,
+                                    len: item.data.length,
+                                    percentage: 0,
+                                    colour: item.data.length ? item.data[0].colour : 'gray'
+                                })
+                            }
+
+                        })
+                    }
+                    if (tempArr.length) {
+                        for (var i = 1; i < tempArr.length; i++) {
+                            var temppercentage = Math.round(tempArr[i].len / this.sum * 100);
+                            tempArr[i].percentage = temppercentage;
+                            tempPerce += temppercentage;
+                        }
+                        tempArr[0].percentage = Math.round(100 - tempPerce)
+                    }
+                    this.personArr = tempArr;
+                    this.switchArr = switchArr;
+
+                    this.showGroupPointers()
+                },
+                showGroupPointers() {
+                    //this.mapData.MY_MAP.removeAllCard();
+                    if (this.personArr && this.personArr.length > 0) {
+                        this.showcardId.forEach((item) => {
+                            this.mapData.MY_MAP.setCardIcon(item, "../img/location.png", {
+                                icon_scale: 0.6,
+                                text_scale: 0.6
+                            })
+                        })
+                        for (var i = 0; i < this.personArr.length; i++) {
+                            this.showGroupPointer(this.personArr[i])
+                        }
+                    } else {
+                        this.showcardId.forEach((item) => {
+                            this.mapData.MY_MAP.setCardIcon(item, "../img/location_offline.png", {
+                                icon_scale: 0.6,
+                                text_scale: 0.6
+                            })
+                        })
+                    }
+                },
+                showGroupPointer(obj) {
+                    var tempArr = [];
+                    var flag = true;
+                    /*if( this.hideswitchArr.includes(obj.label)){
+                        flag = false;
+                    }*/
+
+                    if (obj && obj.child && obj.child.length > 0) {
+                        for (var j = 0; j < obj.child.length; j++) {
+                            this.showPonter({
+                                name: obj.label,
+                                x: obj.child[j].uwbX, //- this.mapData.mapWidth/2,
+                                y: obj.child[j].uwbY, //- this.mapData.mapHeight/2,
+                                datas: obj.child[j]
+                            })
+                        }
+                    }
+                },
+                showPonter(obj) {
+                    let cardId = obj.datas.cardId;
+                    if (this.showcardId.includes(cardId)) {
+                        this.mapData.MY_MAP.setCardCoordinate(cardId, obj.x, obj.y)
+                    } else {
+                        var card_info;
+                        card_info = this.mapData.MY_MAP.addCardInfo(cardId, "../img/location.png", obj.x, obj.y, obj.datas.operatorName, {
+                            icon_scale: 0.6,
+                            text_scale: 0.6
+                        });
+                        card_info.card_id = cardId
+                        card_info.type = 'p'
+                        this.showcardId.push(cardId)
+                    }
+
+                },
+
+
+                getIconScale() {
+                    let MY_MAP = this.mapData.MY_MAP;
+                    // 得到当前地图的缩放比
+                    var zoom = MY_MAP.getZoom();
+                    /*// 缩放比最大为47，根据2dSDK可知，改变图标的大小，就是改变参数icon_scale的值(参数icon_scale的默认值是1)
+                    this.ICON_SCALE = 1 - (47 - parseInt(zoom)) * 0.06;// 当缩放比减小1，则icon_scale的值就减小0.06(这个值可以自己根据实际情况设置)；图标图片的大小应该选择缩放比为最大(即47)时最合适的大小
+                    this.TEXT_SCALE = 1 + (parseInt(zoom) - 40) * 0.06;// 同理ICON_SCALE，图标上的字体大小变化
+                    if (this.ICON_SCALE <= 0.1) {
+                        this.ICON_SCALE = 0.1;
+                    }
+                    if (this.TEXT_SCALE <= 0.1) {
+                        this.TEXT_SCALE = 0.1;
+                    }*/
+                },
+                addSB(e, MOVE_IMG, MOVE_TEXT, DATA) {
+                    this.mapData.MOVE_DATA = DATA;
+                    this.mapData.MOVE_IMG = MOVE_IMG;
+                    this.mapData.MOVE_TEXT = MOVE_TEXT;
+                    this.getIconScale();
+                    let MY_MAP = this.mapData.MY_MAP;
+                    MY_MAP.getTarget().style.cursor = "pointer";
+                    // 得到鼠标的像素点
+                    var pixel = MY_MAP.getEventPixel(e);
+                    // 得到该像素点的坐标
+                    var location_x = MY_MAP.getCoordinateFromPixel(pixel)[0].toFixed(2);
+                    var location_y = MY_MAP.getCoordinateFromPixel(pixel)[1].toFixed(2);
+                    if (this.ICON_SCALE <= 0.2) {
+                        this.$message.error("地图缩放比太小，不能新增");
+                        return;
+                    }
+                    this.MOVE_FEATURE = new HG2DMap.feature.point([location_x, location_y], {
+                        icon: this.mapData.MOVE_IMG,
+                        text: this.mapData.MOVE_TEXT,
+                        icon_scale: this.ICON_SCALE * 0.7,
+                        text_scale: this.TEXT_SCALE * 0.7
+                    });
+                    MY_MAP.addFeature(this.MOVE_FEATURE);
+                    this.MOVE_LOCATION_X = location_x;
+                    this.MOVE_LOCATION_Y = location_y;
+                    MY_MAP.on("pointermove", this.MOVE_SB);
+                    MY_MAP.on("click", this.ADD_SB);
+                },
+                ADD_SB(e) {
+                    this.getIconScale();
+                    let MY_MAP = this.mapData.MY_MAP;
+                    if (this.ICON_SCALE <= 0.2) {
+                        HG_MESSAGE("地图缩放比太小，不能新增");
+                        return;
+                    }
+                    MY_MAP.un("pointermove", this.MOVE_SB);
+                    MY_MAP.removeFeature(this.MOVE_FEATURE);
+                    if (e.dragging) {
+                        return;
+                    }
+                    // 得到鼠标点击地图时的像素点
+                    var pixel = MY_MAP.getEventPixel(e.originalEvent);
+                    // 得到该像素点的坐标
+                    var location_x = MY_MAP.getCoordinateFromPixel(pixel)[0].toFixed(2);
+                    var location_y = MY_MAP.getCoordinateFromPixel(pixel)[1].toFixed(2);
+                    this.MOVE_FEATURE = new HG2DMap.feature.point([location_x, location_y], {
+                        icon: this.mapData.MOVE_IMG,
+                        text: this.mapData.MOVE_TEXT,
+                        icon_scale: this.ICON_SCALE * 0.7,
+                        text_scale: this.TEXT_SCALE * 0.7
+                    });
+                    this.MOVE_FEATURE.data = this.mapData.MOVE_DATA
+                    MY_MAP.addFeature(this.MOVE_FEATURE);
+                    MY_MAP.un("click", this.ADD_SB);
+                },
+                MOVE_SB(e) {
+                    let MY_MAP = this.mapData.MY_MAP;
+                    if (e.dragging) {
+                        return;
+                    }
+                    // 得到鼠标的像素点
+                    var pixel = MY_MAP.getEventPixel(e.originalEvent);
+                    // 得到该像素点的坐标
+                    var location_x = MY_MAP.getCoordinateFromPixel(pixel)[0].toFixed(2);
+                    var location_y = MY_MAP.getCoordinateFromPixel(pixel)[1].toFixed(2);
+                    this.MOVE_LOCATION_X = location_x;
+                    this.MOVE_LOCATION_Y = location_y;
+                    this.MOVE_FEATURE.setCoordinates([location_x, location_y]);
+                },
+                canceDraw(e) {
+                    let MY_MAP = this.mapData.MY_MAP;
+                    if (this.DRAW) {
+                        if (e.which === 27) {
+                            if (this.MOVE_FEATURE) {
+                                MY_MAP.removeFeature(this.MOVE_FEATURE);
+                                MY_MAP.un("pointermove", this.MOVE_SB);
+                                MY_MAP.un("click", this.ADD_SB);
+                            }
+                            MY_MAP.removeInteraction(this.DRAW);
+                            MY_MAP.getTarget().style.cursor = "";
+                            MY_MAP.removeControlMeasure();
+                            this.DRAW = null;
+
+
+                        }
+                    }
+                },
+                mapInit(imgSrc) {
+                    this.mapData.URL = imgSrc;
+                    var Img = new Image();
+                    Img.onload = () => {
+                        const {
+                            width,
+                            height
+                        } = Img;
+                        var bl = width / height - this.mapData.mapWidth / this.mapData.mapHeight;
+                        if (bl >= 0) {
+                            scale = this.mapData.mapWidth / width;
+                        } else {
+                            scale = this.mapData.mapHeight / height;
+                        }
+
+                        let activeW = parseInt(width * scale / 2);
+                        let activeH = parseInt(height * scale / 2);
+                        //let extent = [-activeW,-activeH,activeW,activeH]; //左, 下, 右, 上
+
+                        let pointer = [273, 434];
+                        let extent = [-pointer[0], -(height - pointer[1]), (width - pointer[0]), pointer[1]];
+
+                        let lastCenter = [width / 2 - pointer[0], pointer[1] - height / 2]
+
+                        let resolution = 1;
+                        this.mapData.MY_MAP = new HG2DMap.map(
+                            imgSrc,
+                            "map",
+                            lastCenter,
+                            1,
+                            "image",
+                            extent, {
+                                cluster_distance: 20,
+                                extent: extent,
+                                zoom_factor: 2,
+                                animation_enable: true,
+                                animation_cache_time: 1.5,
+                                cluster_text_function: this.clusterTextFunction,
+                                radius_function: this.radius_function,
+                                resolution: resolution
+                            }
+                        );
+                        this.mapData.MY_MAP.getView().animate({
+                            resolution: resolution,
+                            center: lastCenter
+                        });
+                        this.newMap(this.mapData.MY_MAP)
+
+                    }
+                    Img.src = imgSrc
+                },
+                changeMap() {
+                    var Img = new Image();
+                    Img.onload = () => {
+                        const {
+                            width,
+                            height
+                        } = Img;
+                        var bl = width / height - this.mapData.mapWidth / this.mapData.mapHeight;
+                        if (bl >= 0) {
+                            scale = this.mapData.mapWidth / width;
+                        } else {
+                            scale = this.mapData.mapHeight / height;
+                        }
+
+                        let activeW = parseInt(width * scale / 2);
+                        let activeH = parseInt(height * scale / 2);
+                        let extent = [-activeW, -activeH, activeW, activeH]; //左, 下, 右, 上
+
+                        let resolution = 1;
+                        this.mapData.MY_MAP.changeMap(
+                            this.bgImg, [0, 0],
+                            scale,
+                            "image",
+                            extent, {
+                                cluster_distance: 20,
+                                extent: extent,
+                                zoom_factor: 2,
+                                animation_enable: true,
+                                animation_cache_time: 1.5,
+                                cluster_text_function: this.clusterTextFunction,
+                                radius_function: this.radius_function,
+                                resolution: resolution
+                            })
+                        this.mapData.MY_MAP.getView().animate({
+                            resolution: resolution,
+                            center: [0, 0]
+                        });
+                        this.newMap(this.mapData.MY_MAP)
+
+                    }
+                    this.bgImg = this.bgImg === 'test.png' ? 'xx.jpg' : 'test.png'
+                    Img.src = this.bgImg
+                },
+                /*地图初始化完成后接收定位数据等操作*/
+                newMap(MY_MAP) {
+                    var that = this;
+                    var my_drag_rotate = new HG2DMap.draw.drag_rotate(); // 调用2d地图SDK中的地图旋转
+                    var my_mouse_postion = new HG2DMap.control.mouse_position(); // 调用2d地图SDK中的实例化鼠标坐标工具
+                    var my_scale_line = new HG2DMap.control.scale_line(); // 调用2d地图SDK中的实例化比例尺工具
+                    MY_MAP.addInteraction(my_drag_rotate); // 调用2d地图SDK中的给地图添加地图旋转
+                    MY_MAP.addControl(my_mouse_postion); // 调用2d地图SDK中的给地图添加鼠标坐标工具
+                    MY_MAP.addControl(my_scale_line); // 调用2d地图SDK中的给地图添加比例尺工具
+                    this.MY_POPUP = MY_MAP.addPopup("popup"); // 调用2d地图SDK中的给地图添加信息悬浮框
+                    //MY_POPUP.setPosition(coordinates);
+                    // 鼠标点击地图上图标的时候，调用2d地图SDK中的点击事件
+                    MY_MAP.on('pointerdown', function(e) {
+                        if (e.dragging) {
+                            return;
+                        }
+                        var pixel = MY_MAP.getEventPixel(e.originalEvent); // 调用2d地图SDK中的获得鼠标点击的事件像素
+                        var hit = MY_MAP.hasFeatureAtPixel(pixel); // 调用2d地图SDK中的判断该像素是否存在图标
+                        MY_MAP.getTarget().style.cursor = hit ? 'pointer' : '';
+
+                        if (hit) {
+                            // 调用2d地图SDK中的拿到该图标对象
+                            var feature = MY_MAP.forEachFeatureAtPixel(e.pixel,
+                                function(feature) {
+                                    return feature;
+                                });
+                            console.log(feature)
+                                // 如果图标对象是定位图标，则获得该图标的坐标，并弹出悬浮框
+                            if (feature.card_id) {
+                                MY_MAP.getTarget().style.cursor = 'pointer';
+                                var card = feature.card_id; // 获得卡号
+                                var coordinates = feature.getGeometry().getCoordinates(); // 调用2d地图SDK中的获得坐标
+                                if (feature.type == 'area') {
+                                    var coordinates = MY_MAP.getCoordinateFromPixel(pixel);
+                                    that.MY_POPUP.setPosition(coordinates); // 调用2d地图SDK中的给悬浮框设置坐标
+
+                                    var info = "";
+                                    var a = "";
+                                    $('#popup').html(
+                                        "<p style='white-space :nowrap '>卡号: " + card + "</p>" +
+                                        "<p style='white-space :nowrap ' id='pop_location'>坐标: " + parseFloat(coordinates[0]).toFixed(2) + "," + parseFloat(coordinates[1]).toFixed(2) + "</p>"
+                                    );
+                                    $('#popup').css("left", (-$('#popup').width() / 2 - 11) + "px");
+                                    $('#popup').show();
+
+
+                                } else {
+                                    that.MY_POPUP.setPosition(coordinates); // 调用2d地图SDK中的给悬浮框设置坐标
+                                    var info = "";
+                                    var a = "";
+                                    $('#popup').html(
+                                        "<p style='white-space :nowrap '>卡号: " + card + "</p>" +
+                                        "<p style='white-space :nowrap ' id='pop_location'>坐标: " + parseFloat(coordinates[0]).toFixed(2) + "," + parseFloat(coordinates[1]).toFixed(2) + "</p>" +
+                                        info +
+                                        "<p style='float: left'>操作:</p><a style='float: left;margin-left: 5px' class='call_card' href='#' data-card='" + card + "'>呼叫</a>" + a
+                                    );
+                                    $('#popup').css("left", (-$('#popup').width() / 2 - 11) + "px");
+                                    $('#popup').show();
+
+                                }
+
+
+
+                            }
+                            // 判断图标对象是否是聚类图标，如果是就设置地图缩放比至40，将地图中心视点移至该聚类图标坐标点，并且关闭聚类显示
+                            else if (feature.get("features") && feature.get("features").length > 1) {
+                                var cluster_coordinates = feature.getGeometry().getCoordinates();
+                                MY_MAP.setZoom(40);
+                                MY_MAP.setCenter(cluster_coordinates[0], cluster_coordinates[1]);;
+                                if (MY_MAP.getClusterEnable()) {
+                                    MY_MAP.disableCluster();
+                                }
+                            }
+                            // 判断图标对象是否是摄像头图标，如果是就播放该摄像头实时画面
+                            else if (feature.type == "camera") {
+
+                            } else {
+                                MY_MAP.getTarget().style.cursor = '';
+                                $('#popup').hide();
+                            }
+                        } else {
+                            MY_MAP.getTarget().style.cursor = '';
+                            $('#popup').hide();
+                        }
+                    });
+
+                    MY_MAP.on('pointermove', function(e) {
+                        if (e.dragging) {
+                            return;
+                        }
+                        var pixel = MY_MAP.getEventPixel(e.originalEvent); // 调用2d地图SDK中的获得鼠标点击的事件像素
+                        var hit = MY_MAP.hasFeatureAtPixel(pixel); // 调用2d地图SDK中的判断该像素是否存在图标
+                        MY_MAP.getTarget().style.cursor = hit ? 'pointer' : '';
+
+                        if (hit) {
+                            // 调用2d地图SDK中的拿到该图标对象
+                            var feature = MY_MAP.forEachFeatureAtPixel(e.pixel,
+                                function(feature) {
+                                    return feature;
+                                });
+                            // 如果图标对象是定位图标，则获得该图标的坐标，并弹出悬浮框
+                            if (feature.type == 'tip') {
+                                MY_MAP.getTarget().style.cursor = 'pointer';
+                                var card = feature.card_id; // 获得卡号
+                                var coordinates = feature.getGeometry().getCoordinates(); // 调用2d地图SDK中的获得坐标
+                                if (feature.type == 'area') {
+                                    console.log(coordinates)
+                                    that.MY_POPUP.setPosition(coordinates[0]); // 调用2d地图SDK中的给悬浮框设置坐标
+                                } else {
+                                    that.MY_POPUP.setPosition(coordinates); // 调用2d地图SDK中的给悬浮框设置坐标
+                                }
+
+                                var info = "";
+                                var a = "";
+                                $('#popup').html(
+                                    "<p style='white-space :nowrap '>卡号: " + card + "</p>" +
+                                    "<p style='white-space :nowrap ' id='pop_location'>坐标: " + parseFloat(coordinates[0]).toFixed(2) + "," + parseFloat(coordinates[1]).toFixed(2) + "</p>" +
+                                    info
+
+                                );
+                                $('#popup').css("left", (-$('#popup').width() / 2 - 11) + "px");
+                                $('#popup').show();
+
+                            }
+                        }
+                        /*else {
+                                            MY_MAP.getTarget().style.cursor = '';
+                                            $('#popup').hide();
+                                        }*/
+                    });
+
+
+                    // 地图加载进度
+                    MY_MAP.on('progress', function(e) {
+                        var progress = e.progress * 100;
+                        $(".progress_bar p").html(progress.toFixed(1) + "%");
+                        $(".progress_bar_top").css("width", progress + "%");
+                    });
+                    MY_MAP.on("animate_move", function(e) {
+                        //console.log(e.feature)
+                        //console.log(e.coordinates)
+                        /*if(ANIMATION_SWITCH && FEATURE && FEATURE.card_id == e.feature.card_id && FLOOR_ID != "0"){
+                            var coordinates = e.coordinates;
+                            // 调用2d地图SDK中的设置弹出悬浮框的坐标
+                            MY_POPUP.setPosition(coordinates);
+                            $(".popover-content #pop_location").html(" 坐标: " + parseFloat(coordinates[0]).toFixed(2) + "," + parseFloat(coordinates[1]).toFixed(2));
+                        }*/
+                    });
+                    // 当地图加载完成后，加载进度条和图标隐藏，初始化其他功能
+
+                    MY_MAP.on('loaded', function() {
+                        that.showMapData()
+                            // 让定位图标悬浮框跟随定位图标一起移动
+                            // 移动地图结束后，存下地图的中心视点坐标值
+                        MY_MAP.on("moveend", function() {
+                            /* var center = MY_MAP.getCenter();
+                             sessionStorage.setItem("center_x",center[0]);
+                             sessionStorage.setItem("center_y",center[1]);*/
+                        });
+                        // 改变地图缩放比，当缩放比大于等于39时就关闭聚类显示，小于39就开启聚类显示
+                        MY_MAP.getView().on('change:zoom', function() {
+                            // 改变定位图标大小
+                            //changeLocation(ICON_SCALE,TEXT_SCALE);
+                            // 改变摄像头图标大小
+                            //changeCamera(ICON_SCALE,TEXT_SCALE);
+                        });
+
+                    });
+                },
+                showMapData() {
+                    this.showAreas();
+                    //this.personPonters();
+                    //this.addFlashPointer([300, 400])
+                    /*this.addline()
+                    this.addCircle()*/
+                },
+                drawPolygon() {
+                    var that = this;
+                    let MY_MAP = this.mapData.MY_MAP;
+                    if (this.DRAW) {
+                        MY_MAP.removeInteraction(this.DRAW)
+                    }
+                    // 调用2d地图SDK中的实例化绘制多边形
+                    this.DRAW = new HG2DMap.draw.polygon;
+                    // 调用2d地图SDK中的addInteraction()方法，将绘制多边形的对象添加到地图
+                    MY_MAP.addInteraction(this.DRAW);
+                    this.DRAW.on("drawend", function(e) {
+                        // 调用2d地图SDK中获得所画多边形的点坐标
+                        var polygon = e.feature.getGeometry().getCoordinates();
+                        // 判断所画的多边形是否相交
+                        if ((polygon[0][2][0] == polygon[0][1][0]) && (polygon[0][2][1] == polygon[0][1][1])) {
+                            that.$message.error("图形不能是一条直线！");
+                        } else if (!(HG2DMap.draw.isSelfIntersection(polygon[0]))) {
+                            that.mapData.ADD_DRAW_ID++;
+                            that.mapData.ADD_DRAW_NUM++;
+                            that.mapData.EVACUATE_TMP_AREA[that.mapData.ADD_DRAW_ID] = that.fromArrayGetString(polygon[0]);
+                            // 调用2d地图SDK中的添加一个区域
+                            MY_MAP.addZone(polygon[0], that.mapData.ADD_DRAW_ID, "区域" + that.mapData.ADD_DRAW_NUM);
+                            that.mapData.DRAW_ID_LIST.push(that.mapData.ADD_DRAW_ID);
+                            // 调用2d地图SDK中的removeInteraction()方法，从地图上移除这个对象
+                            MY_MAP.removeInteraction(that.DRAW);
+                            var evacuate_area = '<div><p>撤离区域' + that.mapData.ADD_DRAW_NUM + '</p><i class="glyphicon glyphicon-remove" data-id=' + ADD_DRAW_ID + '></i></div>';
+                            $("#custom_evacuate_list").append(evacuate_area);
+                            $("#draw_type").html("类型<span class='caret'></span>");
+                            $("#draw_info").val("请选择需要绘制的类型");
+                            that.DRAW = null;
+                        } else {
+                            that.$message.error("图形不能自相交");
+                        }
+                    });
+                },
+                drawPointer() {
+
+                },
+                showAreas() {
+                    //设置区域颜色
+                    //my_map.setZoneColor(1,'green')
+                    //设置区域文字
+                    //my_map.setZoneText(1,'12324254')
+                    //removeAllZone() hideAllZone() showAllZone() my_map.removeOneZone(2)
+                    var myZone = null;
+                    this.mapData.areasData.forEach((item) => {
+                        myZone = this.mapData.MY_MAP.addZone(item.pointers, item.id, item.name);
+                        myZone.card_id = item.id
+                        myZone.type = 'area'
+                    })
+                },
+                addCircle() {
+                    let circle = new HG2DMap.feature.circle([0, 0], 100);
+                    this.mapData.MY_MAP.addFeature(circle);
+                },
+                addline() {
+                    let line = new HG2DMap.feature.line([
+                        [100, 100],
+                        [200, 200]
+                    ]);
+                    this.mapData.MY_MAP.addFeature(line);
+                },
+                addFlashPointer(pointers, time) {
+                    // END_FEATURE  removeFeature(feature)
+                    //getCoordinates  setCoordinates (point)  startFlash(time)  stopFlash() 
+                    let END_FEATURE = new HG2DMap.feature.point(pointers, {
+                        icon: "../img/icon/mapLocation.png",
+                        text: "2020"
+                    });
+                    END_FEATURE.type = "tip"
+                    END_FEATURE.card_id = 999
+                        //END_FEATURE.startFlash(time||300)
+                    let flashPointer = this.mapData.MY_MAP.addFeature(END_FEATURE);
+
+                },
+                addTip(pointers) {
+                    let END_FEATURE = new HG2DMap.feature.point(pointers, {
+                        icon: "../img/icon/mapLocation.png"
+                    });
+                    END_FEATURE.type = "tip"
+                    END_FEATURE.card_id = 999
+                    let flashPointer = this.mapData.MY_MAP.addFeature(END_FEATURE);
+                },
+                personPonters() {
+                    /*//更新定位卡坐标
+                    my_map.setCardCoordinate(1,Math.random()*500, Math.random()*500)
+                    //更新定位卡图标
+                    const iconArr = ['mapLocation','location','baseStation','userEdit'];
+                    let iconKey = Math.floor(Math.random()*iconArr.length)
+                    my_map.setCardIcon(1,"../img/icon/"+iconArr[iconKey]+".png")
+                    //更新定位卡的文字
+                    my_map.setCardText(1,iconKey);*/
+                    var card_info;
+                    this.mapData.persionsData.forEach((item) => {
+                        card_info = this.mapData.MY_MAP.addCardInfo(item.id * 100, "../img/icon/location.png", item.pointers[0], item.pointers[1], item.name);
+                        this.addTip([item.pointers[0], item.pointers[1]])
+                        card_info.card_id = item.id
+                        card_info.type = 'persion'
+                    })
+
+                    var timer = setInterval(() => {
+                        //更新定位卡坐标
+                        let x = (Math.random() - 0.5) * 1000;
+                        let y = (Math.random() - 0.5) * 1000
+                        this.mapData.MY_MAP.setCardCoordinate(1 * 100, x, y)
+                        this.addTip([x, y])
+                            //更新定位卡图标
+                        const iconArr = ['mapLocation', 'location', 'baseStation', 'userEdit'];
+                        let iconKey = Math.floor(Math.random() * iconArr.length)
+                            //this.mapData.MY_MAP.setCardIcon(1*100,"../img/icon/"+iconArr[iconKey]+".png")
+                            //更新定位卡的文字
+                            //this.mapData.MY_MAP.setCardText(1*100,iconKey);
+                    }, 1000)
+                    this.showTrack()
+
+                    /* setTimeout(()=>{
+                         clearInterval(timer)
+                         this.mapData.MY_MAP.removeAllTrack()
+                     },3100)*/
+                    //setTimeout(()=>{this.showTrack()},10000) 
+
+                },
+                showTrack() {
+                    this.mapData.MY_MAP.addTrack(100, 500, "HSL(" + 120 + ",100%,40%)");
+                }
+
+            }
+        })
+    </script>
+</body>
+
+</html>
