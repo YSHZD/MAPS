@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="css/favicon.ico">
+    <link type="text/css" rel="styleSheet" href="css/elementui.css"/>
+    <link type="text/css" rel="styleSheet" href="css/swiper.min.css"/>
+    <link type="text/css" rel="styleSheet" href="css/colpick.css"/>
+    <link type="text/css" rel="styleSheet" href="css/style.css"/>
+    <title></title>
+    <style>
+      .el-dialog .el-input{
+        margin-bottom: 10px;
+      }
+      .s_box{
+        cursor: pointer;
+        position: relative;
+      }
+      .swiper-container{
+        position: absolute;
+        left: 6px;
+        right: 6px;
+        top: 6px;
+        bottom: 6px;
+      }
+      .s_list{
+        list-style: none;
+        padding: 0;
+        overflow-y: auto;
+        height: 400px;
+      }
+      .s_uitem{
+        padding: 3px 0;
+        cursor: pointer;
+      }
+      .s_uiact{
+        color: #409EFF;
+      }
+      .editAtc{
+        border-style: dotted;
+      }
+      .s_uitem{
+        text-overflow: -o-ellipsis-lastline;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        -webkit-box-orient: vertical;
+      }
+      .testClass{
+        width:100%;
+        height:400px;
+        text-align: center;
+        position: relative;
+        left:0;
+        right:0;
+        height:250px;
+      }
+      .ml20{
+
+        margin-left: 20px;
+      }
+      .s_box .el-radio-button .el-radio-button__inner{
+        padding: 2px;
+      }
+    </style>
+  </head>
+  <body >
+    
+    <div 
+    class="s_app  flex flex-row" 
+    id="app" 
+    v-cloak 
+    :style="{
+      'background-color':s_styles.defaultColor?s_styles.defaultColor:'#1a2749',
+      'padding':s_styles.defaultBoxPadding?s_styles.defaultBoxPadding/2+'px':'5px'
+    }">
+
+        <div 
+          class="flex1 flex flex-column h100" 
+          v-for="(item,index) in layoutArrs" 
+          :key="index" 
+          :style="{
+          'flex': item.columnW
+        }">
+           <div class="flex flex-row h100 w100" v-for="(item2,index2) in item.children" :key="index2" :style="{'flex': item2.rowH}">
+              <div v-for="(item3,index3) in item2.children" :key="index3"  :style="{'flex': item3.columnW}" class="h100">
+                    <div class="s_item pv" 
+                      :style="{
+                        'padding':s_styles.defaultBoxPadding?s_styles.defaultBoxPadding/2+'px':'5px'
+                      }">
+                          <div 
+                          :id="item3.id"  
+                          class="s_box"  
+                          :style="{
+                          'border-color':s_styles.defaultbrColor?s_styles.defaultbrColor:'#15EDCE',
+                          'border-radius':s_styles.defaultBoxRaius+'px',
+                          'background-color':s_styles.defaultBoxColor?s_styles.defaultBoxColor:'#1a2749',
+                          'box-shadow':s_styles.defaultBoxShadow?s_styles.defaultBoxShadow:'initial'}"
+                          :class="[curId == item3.id?'editAtc' :'']"
+                          @click="bdData(item3.id)" >
+                            <span class="tbadd">+点击添加图表</span>
+                            <!-- <div style="position:absolute;top:0;right:3px">
+                            <el-radio-group size="mini">
+                              <el-radio-button label="本月"></el-radio-button>
+                              <el-radio-button label="本周"></el-radio-button>
+                            </el-radio-group>
+                          </div> -->
+                          </div>
+                    </div>        
+              </div>
+          </div>
+         
+        </div>
+
+
+        <el-dialog
+          title="绑定展示效果以及数据"
+          :visible.sync="bdVisible"
+          width="50%"
+          center
+          >
+            
+            <div class="flex">
+              <div style="250px">
+                
+                <el-input
+                  
+                  placeholder="请输入关键词过滤"
+                  v-model="inputval"
+                  clearable>
+                </el-input>
+                <ul class="s_list">
+                  <li class="s_uitem" :class="[item.id == s_uiId?'s_uiact':0]" v-for="(item,index) in filterlists" :key="index" @click="clickItem(item)">
+                    {{item.label}}
+                  </li>
+                </ul>
+              </div>
+              <div style="width:20px" >
+                
+              </div>
+              <div class="flex1">
+                  <div id="setInit">
+                      <div   
+                      id="testId" 
+                       :style="{
+                          'border-color':s_styles.defaultbrColor?s_styles.defaultbrColor:'#15EDCE',
+                          'border-radius':s_styles.defaultBoxRaius+'px',
+                          'background-color':s_styles.defaultBoxColor?s_styles.defaultBoxColor:'#1a2749',
+                          'box-shadow':s_styles.defaultBoxShadow?s_styles.defaultBoxShadow:'initial'
+                        }"
+                      class="testClass s_box"  
+                      >
+                          图表预览
+                          
+                      </div>
+                  </div>
+              </div>
+            </div>
+            
+           
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="bdVisible = false">取 消</el-button>
+            <el-button type="primary" @click="setOk">确 定</el-button>
+          </span>
+        </el-dialog>
+        <div style="position: fixed;bottom:20px;right:20px;">
+          <el-button type="primary" icon="el-icon-edit" @click="resetIt" circle title="重置编辑布局"></el-button>
+          <el-button type="success" @click="saveIt" icon="el-icon-check" circle title="保存"></el-button>
+          <el-button type="danger" @click="delIt" icon="el-icon-delete" circle title="删除"></el-button>
+        </div>
+    </div>
+    <script src="js/jquery-3.5.1.min.js"></script>
+
+    <script src="js/echarts.js"></script>
+    <script src="maps/china.js"></script>
+    <script src="js/dark.js"></script>
+    <script src="js/common.js"></script>
+   
+    <script type="text/javascript" src="js/vue.js"></script>
+    <script type="text/javascript" src="js/elementui.js"></script>
+    <script type="text/javascript" src="js/swiper.min.js"></script>
+
+    <script>
+      var vm = new Vue({
+        el:'#app',
+        data(){
+          return {
+            setDatas:[],
+            layoutArrs:[],
+            s_styles:{
+                defaultBoxRaius:1,
+                defaultbrColor:'#15EDCE',
+                defaultBoxShadow:'',
+                defaultColor:'rgb(26, 39, 73)',
+                defaultBoxColor:'rgb(26, 39, 73)',
+                defaultFontColor:'#ffffff',
+                defaultBoxPadding:5,
+                defaultGrid:{
+                  left:40,
+                  right:40,
+                  top:40
+                }
+            },
+            inputval:'',
+            s_uiId:'',
+            curId:'',
+            bdVisible:false,
+            options:[
+              {
+                'label':'进度通过率',
+                'type':'进度',
+                'id':'1',
+                'funName':'initChart',
+                'data':{ 
+                        title:'进度',
+                        subText:'xxxx',
+                        data:[
+                          {name:'业主','sum':2,'completed':1},
+                          {name:'监理','sum':20000,'completed':4000},
+                          {name:'施工','sum':130,'completed':120},
+                          {name:'班组','sum':210,'completed':120},
+                          {name:'特种','sum':150,'completed':50},
+                          {name:'特种2','sum':150,'completed':150},
+                          {name:'特种3','sum':0,'completed':150}
+                        ]
+                        ,
+                        chartType:{
+                          dimension:'', //展现维度
+                          showType:'progress',//展现形式
+                        }
+                      }
+              },
+              {
+                'label':'培训通过率',
+                'type':'饼图',
+                'id':'2',
+                'funName':'initChart',
+                'data':{ 
+                        title:'培训通过率',
+                        options:[
+
+                        ],
+                        data:[{
+                             lable:'累计通过率',
+                             value:'90',
+                             children:[
+                                {label:'累计总培训人次',value:"15247",color:'#ff8600'},
+                                {label:'累计总培训人次2',value:"152247",color:'#2fc15b'},
+                                {label:'累计总培训人次3',value:"15247",color:'red'}
+                             ]
+                           }]
+                          ,
+                        chartType:{
+                          dimension:'label', //展现维度
+                          showType:'gauge',//展现形式
+                        }
+                      }
+              },
+              {
+                'label':'各组织人数与培训参与率 TOP52344',
+                'type':'双轴图',
+                'id':'3',
+                'funName':'initChart',
+                'data':{ 
+                        title:'各组织人数与培训参与率 TOP5',
+                        data:[
+
+                        {product: '3月','计划量': 200,'计划量2': 200,},
+                        {product: '4月', '计划量': 400,'计划量2': 200,},
+                        {product: '5月','计划量': 30 ,'计划量2': 200,},
+                        {product: '6月','计划量': 60,'计划量2': 200,},
+                        {product: '7月','计划量': 70,'计划量2': 200,},
+                        {product: '8月','计划量': 90,'计划量2': 200,}
+
+                        ],
+                        chartType:{
+                          dimension:'product', //展现维度
+                          showType:'yyShow',//展现形式
+                          types:['line','bar'], // 值限 line  bar
+                          yName:['计划量','人数'],
+                        }
+                      }
+              },
+              {
+                'label':'人才学历分布占比',
+                'type':'饼图',
+                'id':'4',
+                'funName':'initChart',
+                'data':{ 
+                        title:'人才学历分布占比',
+                        data:[
+                           {"本科":"72.5","中专": "1.5","研究生":'25',"高中":'1'}
+                          ],
+                        chartType:{
+                          dimension:'', //展现维度
+                          showType:'pie',//展现形式
+                          percent:1
+                        }
+                      }
+              },
+              {
+                'label':'人才学历分布占比x',
+                'type':'饼图',
+                'id':'5',
+                'funName':'initChart',
+                'data':{ 
+                        title:'人才学历分布占比x',
+                        data:[
+                           {"本科":"72.5","中专": "1.5","研究生":'25',"高中":'1'}
+                          ],
+                        chartType:{
+                          color:['red','yellow','green'],
+                          dimension:'', //展现维度
+                          showType:'kongpie',//展现形式
+                        }
+                      }
+              },
+              {
+                'label':'双仪表盘',
+                'funName':'initChart',
+                'data':{ 
+                        title:'设备管理',
+                        data:[
+                           {
+                            name:'视频设备',
+                            subName:'视频设备(数量：12)',
+                            vName:'在线率',
+                            value:60  // 界面显示  60%
+                          },
+                          {
+                            name:'定位设备',
+                             vName:'在线率',
+                            subName:'定位设备(数量：12)',
+                            value:80  // 界面显示  80%
+                          }
+
+                          ],
+                        chartType:{
+                          dimension:'', //展现维度
+                          showType:'doubleMeter',//展现形式
+                        }
+                      }
+              },
+
+              {
+                'label':'人才学历分布占比y',
+                'type':'饼图',
+                'id':'6',
+                'funName':'initChart',
+                'data':{ 
+                        title:'人才学历分布占比y',
+                        data:[
+                           {"本科":"72.5","中专": "1.5","研究生":'25',"高中":'1'}
+                          ],
+                        chartType:{
+                          dimension:'', //展现维度
+                          showType:'pie',//展现形式
+                          roseType:'radius'
+                        }
+                      }
+              },
+              {
+                'label':'iframe嵌套',
+                'type':'',
+                'id':'26',
+                'funName':'initIframe',
+                'data':{ 
+                    title:'人才学历分布占比y',
+                    url:'./preview.html'
+                  }
+              },
+              {
+                'label':'散列图',
+                'type':'散列图',
+                'id':'7',
+                'funName':'initChart',
+                'data':{ 
+                        title:'散列图',
+                        data:[
+                            [10.0, 8.04],
+                            [8.0, 6.95],
+                            [13.0, 7.58],
+                            [9.0, 8.81],
+                            [11.0, 8.33],
+                            [14.0, 9.96],
+                            [6.0, 7.24],
+                            [4.0, 4.26],
+                            [12.0, 10.84],
+                            [7.0, 4.82],
+                            [5.0, 5.68]
+                          ],
+                        chartType:{
+                          dimension:'', //展现维度
+                          showType:'scatter'//展现形式
+                        }
+                      }
+              },
+              {
+                'label':'考试计划审核通过率',
+                'type':'仪表盘',
+                'id':'8',
+                'funName':'initChart',
+                'data':{ 
+                        title:'考试计划审核通过率',
+                        data:[
+                            {
+                              lable:'通过率',
+                              value:'90'
+                            }
+                          ],
+                        chartType:{
+                          dimension:'通过率', //展现维度
+                          showType:'gauge',//展现形式
+                          lineStyle:{
+                              width:18,
+                              color:[[0.8, 'yellow'], [1, '#FF0000']]
+                          }
+                        }
+                      }
+              },
+              {
+                'label':'近6月新增培训班数量',
+                'type':'线面积图',
+                'id':'9',
+                'funName':'initChart',
+                'data':{ 
+                        title:'近6月新增培训班数量ssss',
+                        data:[{product: '在线培训', '3月': 2, '4月': 11,'5月': 8, '6月': 10,'7月': 12, '8月': 16}],
+                        chartType:{
+                          dimension:'product', //展现维度
+                          showType:'line',//展现形式
+                          colors:[
+                            ['#ff9800','#f0f8ff00'],
+                            ['green','#f0f8ff00'],
+                            ['#facc14','#b7fa14']
+                          ]
+                        }
+                      }
+              },
+              {
+                'label':'各组织人数与培训参与率bar',
+                'type':'柱形图',
+                'id':'10',
+                'funName':'initChart',
+                'data':{
+                    title:'各组织人数与培训参与率 TOP5xsxxxxxxxxxxxxx',
+
+                    data:{
+                      data:[ 
+                            {product: '01','总人数': 100},
+                            {product: '02','总人数': 1020},
+                            {product: '03','总人数': 1040},
+                            {product: '04', '总人数': 200},
+                            {product: '11', '总人数': 150}
+                          ]
+                    },
+                    chartType:{
+                      dimension:['product','总人数'], //展现维度
+                      showType:'bar',//展现形式
+                      isStack:1,  // 只对 lineBg bar 1 堆叠  0 不堆叠
+                    }
+                }
+              },
+              {
+                'label':'各组织人数与培训参与率 TOP5cccccccc',
+                'type':'多类图',
+                'funName':'initChart',
+                'id':'11',
+                'data':{
+                    title:'各组织人数与培训参与率 mubar',
+                    data:[  
+                      {product: '中国电投资','总人数': 100, '培训人数': 85},
+                      {product: '中国电力投资', '总人数': 200, '培训人数': 140},
+                      {product: '中国华电集团', '总人数': 150, '培训人数': 120},
+                       {product: '中国华电集团2', '总人数': 150, '培训人数': 120},
+                        {product: '中国华电集团3', '总人数': 150, '培训人数': 120},
+                         {product: '中国华电集团4', '总人数': 150, '培训人数': 120},
+                          {product: '中国华电集团5', '总人数': 150, '培训人数': 120},
+                           {product: '中国华电集团6', '总人数': 150, '培训人数': 120},
+                            {product: '中国华电集团7', '总人数': 150, '培训人数': 120},
+                             {product: '中国华电集团8', '总人数': 150, '培训人数': 120},
+                              {product: '中国华电集团9', '总人数': 150, '培训人数': 120},
+                               {product: '中国华电集团11', '总人数': 150, '培训人数': 120},
+                                {product: '中国华电集团21', '总人数': 150, '培训人数': 120},
+                                 {product: '中国华电集团23', '总人数': 150, '培训人数': 120},
+                                  {product: '中国华电集团234', '总人数': 150, '培训人数': 120},
+                                   {product: '中国华电集团25', '总人数': 150, '培训人数': 120}
+                    ],
+                    chartType:{
+                      dimensions: ['product', '培训人数','总人数'], //展现维度
+                      showType:'bar',//展现形式
+                      barWidth:10,
+                      types:[
+                        /*{type: 'line'},*/
+                       {type: 'bar'},
+                       {type: 'bar'}
+                      ]
+
+                    }
+                }
+              },
+              {
+                'label':'中国飞线图',
+                'type':'地图',
+                'id':'12',
+                'funName':'initChart',
+                'data':{
+                    data:[],
+                    chartType:{
+                      color:['red','yellow','green'],
+                      dimensions: '', //展现维度
+                      showType:'myMap',//展现形式
+                    }
+                }
+              },
+              {
+                'label':'轮播图',
+                'type':'轮播图',
+                'id':'13',
+                'funName':'initSwiper',
+                'data':{
+                    data:[],
+                    chartType:{
+                      dimensions: '', //展现维度
+                      showType:'swiper',//展现形式
+                    }
+                }
+              }
+            ],
+            list:[
+                {
+                  'label':'搜索文字xxxxx', // 绑定数据时  显示列表文字 便于搜索
+                  'id':'12', //  
+                  'layoutId':'', // 绑定页面布局图表id 数据与视图绑定用
+                  'funName':'initChart', // 展示视图类型
+                  'currentlable':'本月', //
+                  optionUrl:[   
+                      {
+                        lable:'本周',url:'xxxxx'
+                      },
+                      {
+                        lable:'本月',url:'xxxxx'
+                      }
+                  ]
+                },
+                {
+                  'label':'xxxxx',
+                  'id':'12',
+                  'layoutId':'',
+                  'funName':'initChart',
+                  'currentlable':'xxxx',
+                  optionUrl:[
+                      {
+                        lable:'xxxx',url:'xxxxx'
+                      }
+                  ]
+                },
+            ]
+          }
+        },
+        created(){
+        },
+        computed:{
+            filterlists:function(){
+                var that = this;
+                this.s_uiIndex = -1;
+                if(!this.inputval){
+                  return this.options;
+                }else{
+                   return this.options.filter(function(item){
+                    if(item.label.indexOf(that.inputval) != -1){
+                      return item;
+                    }
+                  }) 
+                 }   
+            }
+        },
+        mounted(){
+          var datasall = localStorage.getItem('datasall');
+          var temp = localStorage.getItem('layout');
+          var that = this;
+          if(!!temp && !datasall){
+            var tempObj = JSON.parse(temp);
+            this.layoutArrs = tempObj.layoutArrs;
+            this.s_styles = tempObj.s_styles;
+          }
+          if(!!datasall){
+            var tempObj = JSON.parse(datasall);
+            this.setDatas = tempObj.setDatas;
+            this.layoutArrs = tempObj.layoutArrs;
+            this.s_styles = tempObj.s_styles;
+            this.$nextTick(function(){
+              that.changeInit()
+            })
+            
+          }
+          window.onresize = function(){ // 定义窗口大小变更通知事件
+              var temp = localStorage.getItem('layout');
+                if(!!temp){
+                var tempObj = JSON.parse(temp);
+                console.log(0)
+                that.layoutArrs = tempObj.layoutArrs;
+                that.s_styles = tempObj.s_styles;
+              }
+          }
+        },
+        watch:{
+          
+        },
+        methods:{
+         
+          resetIt:function(){
+              localStorage.removeItem('datasall');
+              location.href = 'layout.html'
+          },
+          delIt:function(){
+            this.$confirm('此操作将删除当前布局以及绑定图表, 是否继续?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }).then(() => {
+              this.clearData();
+              this.dialogVisible = true;
+            }).catch(() => {
+                       
+            });
+          },
+          clearData:function(){
+            localStorage.removeItem('datasall');
+            localStorage.removeItem('layout');
+            window.location.href = './layout.html'
+          },
+          clickItem:function(obj){
+            this.s_uiId = obj.id;
+            var index = this.fontArrIndex(this.options,obj,'id');
+            var tempObj = this.options[index];
+            if(this.options[index].type != '轮播图'){
+                $('#setInit').html(`<div   id="testId"  style="width:100%;height:400px;text-align: center;position: relative;left:0;right:0;height:250px">
+                    图表预览
+                </div>`)
+            }
+            window[tempObj.funName]('testId',tempObj.data,{
+              'boxColor':this.s_styles.defaultBoxColor,
+              'fontColor':this.s_styles.defaultFontColor,
+              'grid':this.s_styles.defaultGrid
+            });
+          },
+          saveIt:function(){
+
+           var sum = 0;
+           var that = this;
+           this.layoutArrs.forEach(function(item){
+              if(item && item.children){
+                item.children.forEach(function(item2){
+                      if(item2 && item2.children && item2.children.length){
+                           sum+=item2.children.length
+                      }
+                })
+              }
+           });
+           if(sum != this.setDatas.length){
+              this.$message.error('所有图表不能为空！');
+           }else{
+              
+             var obj = {
+                setDatas:this.setDatas,
+                s_styles:this.s_styles,
+                layoutArrs:this.layoutArrs
+             }
+             localStorage.setItem('datasall',JSON.stringify(obj));
+             
+           }
+          },
+          setOk:function(){
+            if(!this.s_uiId){
+              this.$message.error('请先选择图表！');
+              return;
+            }
+            var index0 = this.fontArrIndex(this.options,{id:this.s_uiId},'id');
+
+            var tempObj = this.options[index0];
+            var index = this.fontArrIndex(this.setDatas,{id:this.curId},'id');
+            if(index == -1){
+                this.setDatas.push({
+                  data:tempObj.data,
+                  funName:tempObj.funName,
+                  id:this.curId
+                })
+            }else{
+                this.setDatas[index] = {
+                  data:tempObj.data,
+                  funName:tempObj.funName,
+                  id:this.curId
+                }
+            }
+            this.changeInit();
+            this.bdVisible = false;
+          },
+          fontArrIndex:function(arr,item,key){
+              for(var i = 0 ; i < arr.length; i++){
+                if(arr[i][key] === item[key]){
+                  return i
+                }
+              }
+              return -1;
+          },
+          bdData:function(id){
+            this.curId = id;
+            this.bdVisible = true;
+            this.s_uiIndex = -1;
+            
+          },
+         
+          editOk:function(){
+            this.changeInit();
+            this.dialogVisible = false;
+          },
+          changeInit:function(){
+
+              var that = this;
+              this.setDatas.forEach(function(item){
+                window[item.funName](item.id,item.data,{
+                'boxColor':that.s_styles.defaultBoxColor,
+                'fontColor':that.s_styles.defaultFontColor,
+                'grid':that.s_styles.defaultGrid
+              });
+              })
+          }
+        }
+      })
+
+
+    </script>
+
+  </body>
+</html>
+

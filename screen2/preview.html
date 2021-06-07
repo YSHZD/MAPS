@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="css/favicon.ico">
+    <link type="text/css" rel="styleSheet" href="css/elementui.css"/>
+    <link type="text/css" rel="styleSheet" href="css/swiper.min.css"/>
+    <link type="text/css" rel="styleSheet" href="css/style.css"/>
+    <title></title>
+    <style>
+      .s_box{
+        position: relative;
+      }
+      .swiper-container{
+        position: absolute;
+        left: 6px;
+        right: 6px;
+        top: 6px;
+        bottom: 6px;
+      }
+    </style>
+  </head>
+  <body >
+    <div 
+    class="s_app  flex flex-row" 
+    id="app" 
+    v-cloak 
+    :style="{
+      'background-color':s_styles.defaultColor?s_styles.defaultColor:'#1a2749',
+      'padding':s_styles.defaultBoxPadding?s_styles.defaultBoxPadding/2+'px':'5px'
+    }"
+    >
+      <div class="flex1 flex flex-column h100" v-for="(item,index) in layoutArrs" :key="index" :style="{'flex': item.columnW}">
+           <div class="flex  w100" v-for="(item2,index2) in item.children" :key="index2" :style="{'flex': item2.rowH}">
+            <div class="s_item pv" 
+            :style="{
+              'padding':s_styles.defaultBoxPadding?s_styles.defaultBoxPadding/2+'px':'5px'
+            }">
+                <div :id="item2.id" :class="[curId == item.id?'editAtc' :'']" class="s_box" @click="bdData(item2.id)" 
+                :style="{
+                'border-color':s_styles.defaultbrColor?s_styles.defaultbrColor:'#15EDCE',
+                'border-radius':s_styles.defaultBoxRaius+'px',
+                'background-color':s_styles.defaultBoxColor?s_styles.defaultBoxColor:'#1a2749',
+                'box-shadow':s_styles.defaultBoxShadow?s_styles.defaultBoxShadow:'initial'}">
+                  <span class="tbadd">+点击添加图表</span>
+                </div>
+            </div>
+          </div>
+         
+        </div>  
+    </div>
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script src="js/echarts.js"></script>
+    <script src="maps/china.js"></script>
+    <script src="js/dark.js"></script>
+    <script src="js/common.js"></script>
+  <script type="text/javascript" src="js/vue.js"></script>
+    <script type="text/javascript" src="js/elementui.js"></script>
+    <script type="text/javascript" src="js/swiper.min.js"></script>
+
+    <script>
+      new Vue({
+        el:'#app',
+        data(){
+          return {
+            setDatas:[],
+            layoutArrs:[
+                
+            ],
+            s_styles:{
+                defaultBoxRaius:1,
+                defaultbrColor:'#15EDCE',
+                defaultBoxShadow:'',
+                defaultColor:'rgb(26, 39, 73)',
+                defaultBoxColor:'rgb(26, 39, 73)',
+                defaultFontColor:'#ffffff',
+                defaultBoxPadding:5,
+                defaultGrid:{
+                  left:40,
+                  right:40,
+                  top:40
+                }
+            },
+          }
+        },
+        created(){
+
+        },
+        mounted(){
+          var that = this;
+          var obj = JSON.parse(localStorage.getItem('datas'));
+          if(obj){
+            this.setDatas = obj.setDatas;
+            this.bgColor = obj.bgColor;
+            this.s_styles = obj.s_styles;
+            this.layoutArrs = obj.layoutArrs;
+
+            this.$nextTick(function(){
+              that.setDatas.forEach(function(item){
+                 window[item.funName](item.id,item.data,{
+                  'boxColor':that.s_styles.defaultBoxColor,
+                  'fontColor':that.s_styles.defaultFontColor,
+                  'grid':that.s_styles.defaultGrid
+                });
+              })
+            });     
+          }
+        },
+        watch:{
+          
+        },
+        methods:{
+        }
+      })
+    </script>
+  </body>
+</html>

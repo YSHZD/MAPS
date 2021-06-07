@@ -1,0 +1,2723 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <@sp.themes/>
+  <style>
+    .allbottom .flex{
+      margin-bottom:10px
+    }
+    .w500{
+      width:800px
+    }
+    .el-input-number--mini{
+      line-height:25px;
+    }
+    .ptb5{
+      padding:6px 0;
+      box-sizing:border-box;
+    }
+    .fontBig{
+      font-size:30px;
+    }
+    
+    .el-loading-spinner .el-loading-text{
+      color:#ffffff;
+    }
+    .el-loading-spinner .path{
+      stroke:#ffffff;
+    }
+    .el-dialog__body .oneTxt{
+      padding-right:30px;
+      box-sizing:border-box;
+      height:32px;
+      line-height:32px;
+    }
+    .treeSide{
+      width: 250px;
+      padding: 15px 0 15px 15px;
+        box-sizing: border-box;
+    }
+    .treepanel{
+      background:#ffffff;
+      padding: 10px;
+        box-sizing: border-box;
+        border-radius: 10px;
+    }
+    .tools{
+      background:#ffffff;
+      padding: 10px;
+        box-sizing: border-box;
+        height:40px;
+    }
+    .tools strong{
+        cursor:pointer;
+      margin-right:15px;
+      color:#333;
+      font-weight:400;
+    }
+    .tools span{
+      margin-right:3px;
+    }
+    .tiptxt{
+      color:gray;
+      font-size:12px;
+      margin:0 6px;
+    }
+    .mt15{
+      margin-bottom:10px;
+    }
+    .echartTitle{
+      text-align: center;
+        background: #ffffff;
+        font-size: 18px;
+        line-height: 30px;
+        font-weight: bolder;
+        color: #333333;
+       
+    }
+    .simg img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+    }
+    .snum{
+      font-size:24px!important;
+      margin-top:15px;
+    }
+    .txt_list{
+      overflow-y:auto;
+    }
+    .txt_list span{
+      display:inline-block;
+      padding:0 6px;
+      box-sizing:border-box;
+      height:30px;
+      line-height:30px;
+    }
+    .cpointer{
+      width:8px;
+      height:8px;
+      display:inline-block;
+      border-radius:50%;
+      background:gray;
+      margin-bottom:1px;
+    }
+    .serial{
+      font-size:12px;
+    }
+    .twidth{
+      width:60px;
+    }
+    #canvasparent{
+      position:relative;
+    }
+    #iDialog{
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      background:rgba(0,0,0,0.3);
+      padding:5px 10px;
+      border-radius: 5px;
+      color: #fff;
+      z-index: 999999999;
+      height:300px;
+      width:200px;
+      overflow:auto;
+    }
+    .notAtc{
+      color:gray
+    }
+    .notAtc .cpointer{
+      background:gray!important;
+    }
+    .el-select__tags{
+      height:28px;
+      overflow:auto;
+    }
+    .ptip .el-dialog__body .oneTxt{
+      padding-right:0
+    }
+       .el-tag.el-tag--info .el-tag__close{
+          display:none;
+       }
+    
+  </style>
+  <link href="<@sp.static/>/moltran/assets/css/newbase.css" rel="stylesheet" type="text/css">
+</head>
+<body >
+  <div class="flex h100" id="app" >
+    <div class="menuSide h100" :style="{'flex':changmenushow?'0 0 200px':'0 0 40px'}">
+      <com-menu ref="menu" :menulist="menulist" @change ="changeMenuCurrentIndex" @menuchange="changmenu"></com-menu>
+    </div>
+    <div class="treeSide h100" v-cloak  v-show="showTree">
+       <com-tree url="${rc.contextPath}/item/area/api/queryAreaProTree.html" @change = "handleNodeClick"></com-tree>
+    </div>
+    <div class="flex1 h100 flex flex-column">
+      <div class="contentTop w100" v-if="menulist[menuCurrentIndex].value == 1 ||menulist[menuCurrentIndex].value == 2 ">
+        <div class="content-box" v-cloak >
+          <div class="">
+            <div class="content_box flex">
+              <div class="flex1">
+                <el-form :inline="true"  class="demo-form-inline" @submit.native.prevent>
+                       
+                      <el-form-item label="姓名：" v-show="menulist[menuCurrentIndex].value == 2">
+                        <el-select
+                         @change="changeName"
+                        v-model="name_operateId"
+                        filterable
+                        clearable 
+                        placeholder="请输入关键词"
+                       >
+                        <el-option
+                          v-for="item in operatorNamelist"
+                          :key="item.operateId"
+                          :label="item.operatorName"
+                          :value="item.operateId">
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="身份证号：" v-show="menulist[menuCurrentIndex].value == 2">
+                        <el-select
+                         
+                        v-model="name_ID"
+                        clearable 
+                        filterable
+                        :disabled="!name_operateId"
+                        placeholder="请输入关键词"
+                        >
+                        <el-option
+                          v-for="item in idlist"
+                          :key="item.operateId"
+                          :label="item.idcard"
+                          :value="item.operateId">
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="时间：" v-show="menulist[menuCurrentIndex].value == 2">
+                        <span style="position:relative" >
+                          <el-date-picker
+                            :clearable="false"
+                            :editable="false"
+                            size="medium"
+                            v-model="dtime"
+                            value-format="yyyy-MM-dd"
+                            type="date"
+                            :picker-options="endDates"
+                            placeholder="选择日期">
+                          </el-date-picker>
+                          <el-time-select
+                             :clearable="false"
+                             :editable="false"
+                             size="medium"
+                            placeholder="起始时间"
+                            v-model="startTime"
+                            :picker-options="{
+                              start: '00:00',
+                              step: '01:00',
+                              end: '23:00',
+                              maxTime:endTime
+                            }">
+                          </el-time-select>
+                            -
+                          <el-time-select
+                            :clearable="false"
+                              :editable="false"
+                              size="medium"
+                            placeholder="结束时间"
+                            v-model="endTime"
+                            :picker-options="{
+                              start: '00:59',
+                              step: '01:00',
+                              end: '23:59',
+                              minTime: startTime
+                            }">
+                          </el-time-select>
+                        </span>
+                    </el-form-item>
+                  
+                     <el-form-item  v-show="menulist[menuCurrentIndex].value == 1">
+                         <el-radio-group v-model="datype" size="medium">
+                            <el-radio-button label="date" >日</el-radio-button>
+                          <el-radio-button label="month">月</el-radio-button>
+                          <el-radio-button label="year">年</el-radio-button>
+                          <el-radio-button label="def">自定义</el-radio-button>
+                        </el-radio-group>
+                      </el-form-item>
+                      <el-form-item  v-show="menulist[menuCurrentIndex].value == 1">
+                        <span style="position:relative"  v-show="datype == 'date'">
+                          <el-date-picker
+                           v-if="datype == 'date'"
+                            :clearable="false"
+                            :editable="false"
+                            size="medium"
+                            v-model="dtime"
+                            value-format="yyyy-MM-dd"
+                            :type="datype"
+                            :picker-options="endDates"
+                            placeholder="选择日期">
+                          </el-date-picker>
+                          <el-time-select
+                           v-if="datype == 'date'"
+                             :clearable="false"
+                             :editable="false"
+                             size="medium"
+                            placeholder="起始时间"
+                            v-model="startTime"
+                            :picker-options="{
+                              start: '00:00',
+                              step: '01:00',
+                              end: '23:00',
+                              maxTime:endTime
+                            }">
+                          </el-time-select>
+                            -
+                          <el-time-select
+                            :clearable="false"
+                              :editable="false"
+                              size="medium"
+                            placeholder="结束时间"
+                            v-model="endTime"
+                            :picker-options="{
+                              start: '00:59',
+                              step: '01:00',
+                              end: '23:59',
+                              minTime: startTime
+                            }">
+                          </el-time-select>
+                        </span>
+                        
+                         <span style="position:relative"  v-show="datype == 'month'">
+                          <el-date-picker
+                          v-if="datype == 'month'"
+                            :clearable="false"
+                            size="medium"
+                            v-model="mtime"
+                            value-format="yyyy-MM"
+                            :type="datype"
+                            :picker-options="endDates"
+                            placeholder="选择日期">
+                          </el-date-picker>
+                         </span>
+                        
+                         <span style="position:relative"  v-show="datype == 'year'">
+                          <el-date-picker
+                           v-if="datype == 'year'"
+                            :clearable="false"
+                            size="medium"
+                            v-model="ytime"
+                            value-format="yyyy"
+                            :type="datype"
+                            :picker-options="endDates" 
+                            placeholder="选择日期">
+                          </el-date-picker>
+                         </span>
+                        
+                        
+                         <span style="position:relative" v-show="datype == 'def'">
+                          <el-date-picker
+                             v-if="datype == 'def'"
+                            :clearable="false"
+                              :editable="false"
+                              size="medium"
+                          
+                            v-model="range[0]"
+                            type="date"
+                            placeholder="选择起始时间"
+                            value-format="yyyy-MM-dd" 
+                            size="small" 
+                            :picker-options="beginDate" 
+                            @change="changestartDate"
+                            >
+                          </el-date-picker>
+                          -
+                          <el-date-picker
+                           v-if="datype == 'def'"
+                           :clearable="false"
+                            :editable="false"
+                            size="medium"
+                           
+                            v-model="range[1]"
+                            type="date"
+                            placeholder="选择结束时间"
+                            value-format="yyyy-MM-dd" 
+                            size="small" 
+                            :picker-options="endDate" 
+                            @change="changeendDate"
+                            >
+                          </el-date-picker>
+                          
+                         </span>
+                       </el-form-item>
+                  <el-form-item>
+                    <el-button type="primary" @click="searchClick()" size="medium">查询</el-button>
+                    <el-button @click="searchClick(1)" size="medium">重置</el-button>
+                  </el-form-item>
+                </el-form>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="w100 flex1 h100"  >
+           <div  class="contentTop flex h100" :style="{'height':height+5+'px','width':contentTopWidth+'px'}" v-cloak  v-show="menulist[menuCurrentIndex].value == 0">
+                <div class="flex1 simg h100 bg-white " id="canvasparent" style="border-radius:10px;padding:10px;" v-show="currentNode && currentNode.type == 'project' && !canvasNotData">
+                   <canvas id="canvas" width="1000" height="500" ></canvas>
+                </div>
+                 <div class="flex1 simg h100 bg-white flex"   style="border-radius:10px;padding:10px;" v-show="currentNode.type != 'project' || canvasNotData">
+                   
+                   <p class="noMsg" v-cloak v-if="currentNode && currentNode.type != 'project'">请先选择工程</p>
+                   <p class="noMsg w100" v-cloak  v-if="currentNode && currentNode.type == 'project' && canvasNotData">
+                   请先在工程地图当中上传地图
+                   <br>
+                    <el-button v-cloak round v-if="currentNode && currentNode.type == 'project' && canvasNotData" @click="go">工程地图</el-button>
+                   </p>
+                  
+                 </div>
+                <div style="width:250px;" class="h100 pl10">
+                  <div class="flex-column bg-white p15 h100 br10" v-cloak>
+                    <div class="sy-title w100">数据统计</div>
+                      <div class="txtCenter myTitle w100 snum">{{sum}}</div>
+                      <p class="txtCenter gray w100 mt15">在场人员定位总数</p>
+                      <div class="sy-title w100">人员占比排名</div>
+                      <div style="margin-top: 20px " class="txtCenter  w100 mt15">
+                    <el-radio-group v-model="type" size="mini" @change="getperson">
+                      <el-radio-button label="operType">人员类型</el-radio-button>
+                      <el-radio-button label="group">班组</el-radio-button>
+                    </el-radio-group>
+                 </div>
+                
+                 
+                  <ul class="txt_list"
+                    :style="{
+                      'max-height':height-250+'px'
+                    }"
+                  >
+                    <li class="flexInit pointer" :class="{notAtc:!hasOwn(hideswitchArr,item.label)}" v-for="(item,index) in personArr" @click="switchClick(item)">
+                      <span class="serial oneTxt" :title="index+1" style="width:36px;display:inline-block">{{index+1}}</span>
+                      <span ><strong class="cpointer" :style="{'background':item.colour}"></strong></span>
+                      <span class="oneTxt twidth" :title="item.label">{{item.label}}</span>
+                      <span>{{item.len}}</span>
+                      <span>{{(item.percentage?item.percentage:0)+'%'}}</span>
+                    </li>
+                  </ul>
+                   <p class="noMsg"  v-if="personArr.length == 0">暂无数据</p>
+                  
+                  </div>
+                    
+                </div>
+                
+           </div>
+           <div  class="contentTop " :style="{'height':height-80+'px','width':contentTopWidth+'px','padding-top':0,'position':'relative'}" v-cloak  v-show="menulist[menuCurrentIndex].value == 2">
+               
+               <div class="flex1 simg h100 bg-white "  style="border-radius:10px;padding:10px;" v-show="currentNode && currentNode.type == 'project' && !canvasNotData2">
+                   <canvas id="canvas2" width="1000" height="500" ></canvas>
+                </div>
+                <div class="flex1 simg h100 bg-white flex"   style="border-radius:10px;padding:10px;" v-show="currentNode.type != 'project' || canvasNotData2">
+                   
+                 <p class="noMsg" v-cloak v-if="currentNode && currentNode.type != 'project'">请先选择工程</p>
+                 <p class="noMsg w100" v-cloak  v-if="currentNode && currentNode.type == 'project' && canvasNotData2">
+                 请先在工程地图当中上传地图
+                 <br>
+                  <el-button v-cloak round v-if="currentNode && currentNode.type == 'project' && canvasNotData2" @click="go">工程地图</el-button>
+                 </p>
+                
+               </div>
+           </div>
+           <div  class="contentTop" :style="{'height':height+30+'px','padding-top':0,'width':contentTopWidth+'px'}" v-cloak  v-show="menulist[menuCurrentIndex].value == 1">
+                <div class="tools" style="border-top-left-radius:10px;border-top-right-radius:10px;height:40px;" >
+                  <!--  <strong @click="toolClick('tooldc')">
+                      <span class="iconfont icon-daochu1 pointer" ></span>导出
+                   </strong> -->
+                   <!-- <el-form :inline="true"  class="demo-form-inline" @submit.native.prevent style="display:inline-block">
+                     <el-form-item label="区域选择：">
+                    <el-select v-model="search.state" @change="getData"   multiple  collapse-tags  placeholder="请选择" size="medium">
+                    <el-option
+                      v-for="(item,index) in addressArr"
+                      :key="index"
+                      :label="item.regionName"
+                      :value="item.regionId">
+                    </el-option>
+                 </el-select>
+                </el-form-item>
+              </el-form> -->
+              
+                   <span class="fr pointer">
+                     <span :class="showTypeCurrent == 0?'atv':''"  class="iconfont icon-zhexiantu" @click="showTypeClick(0)"></span>
+                     <span  :class="showTypeCurrent == 1?'atv':''" class="iconfont icon-caidanguanli1" @click="showTypeClick(1)"></span>
+                   </span>
+                </div>
+                <h3 class="echartTitle" v-if="showTypeCurrent == 1"  v-clamp="1" >
+                  {{titles}}
+                 </h3>
+                   
+                
+               
+                 <p 
+                 :style="{
+                  'width': contentTopWidth-20+'px',
+                  'background':'#ffffff',
+                  'border-bottom-left-radius':'10px',
+                  'border-bottom-right-radius':'10px',
+                  'height':canvasheight +10 +'px'
+                }" 
+                 class="noMsg flex"  
+                 v-if="currentNode && currentNode.type != 'project'">请先选择工程</p>
+                <div 
+                v-show="showTypeCurrent == 0 && currentNode && currentNode.type == 'project'" 
+                :style="{
+                  'width': contentTopWidth-20+'px',
+                  'background':'#ffffff',
+                  'border-bottom-left-radius':'10px',
+                  'border-bottom-right-radius':'10px',
+                  'height':canvasheight +10+'px',
+                  'padding-bottom':'20px'
+                }"
+                v-loading="loading"
+              element-loading-text="拼命加载中"
+              element-loading-spinner="el-icon-loading"
+              element-loading-background="rgba(0, 0, 0, 0.2)"
+                ref="canvas" 
+                id="zx"
+                >
+
+                
+                </div>
+              <el-table
+              v-loading="loading"
+              element-loading-text="拼命加载中"
+              element-loading-spinner="el-icon-loading"
+              element-loading-background="rgba(0, 0, 0, 0.2)"
+              v-show="showTypeCurrent == 1 && currentNode && currentNode.type == 'project'"
+              :data="tableData"
+              style="width: 100%;border-bottom-left-radius:10px;border-bottom-right-radius:10px"
+              :height="height+5"
+              >
+              <el-table-column label="序号" type="index"  width="55" align="center" >
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.$index  + 1 }}
+                  </span>
+                </template>
+                </el-table-column>
+             
+              <el-table-column
+                prop="operateName"
+                label="姓名"
+                align="center"
+                >
+              </el-table-column>
+              <el-table-column
+                prop="num"
+                label="越区次数"
+                align="center"
+                >
+              </el-table-column>
+              
+            </el-table>
+           </div>
+          
+        
+        
+        
+      <el-dialog
+          title="详情"
+          :visible.sync="tipVisible"
+          width="30%"
+          class="ptip"
+          >
+          <div v-if="pdata">
+            <div  class="flex">
+              <div class="flexInit flex1"  style="align-items: center">
+                <div class="myTitle oneTxt">工程：</div>
+                <div class="flex1  gray "  v-clamp="1" :key="currentNode.name+'2'">{{currentNode.name}}</div>
+              </div>
+              <div class="flexInit flex1"  style="align-items: center">
+                <div class="myTitle oneTxt">区域名称：</div>
+                <div class="flex1  gray" v-clamp="1">{{pdata.areaName}}</div>
+              </div>
+              <div class="flexInit flex1" style="align-items: center">
+                <div class="myTitle oneTxt">区域类型：</div>
+                <div class="flex1  gray "  v-clamp="1">
+                  {{pdata.areaType=='danger_area'?'危险区域':'普通区域'}}
+                </div>
+              </div>
+            </div>
+          <el-table
+              :data="pdata.operators"
+               height="300"
+              :style="{'width': '100%'}">
+             
+              <el-table-column label="序号" type="index"  width="55" align="center">
+                <template slot-scope="scope">
+                    <span>
+                    {{ scope.$index + 1 }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="operatorName"
+                align="center"
+                label="姓名">
+               <template slot-scope="scope">
+                  <div v-clamp="1">{{scope.row.operatorName}}</div>
+                </template>
+              </el-table-column>
+            <el-table-column
+              prop="unitName"
+                label="参建单位"
+                align="center">
+                    <template slot-scope="scope">
+                    <div v-clamp="1">{{scope.row.unitName}}</div>
+                  </template>
+              </el-table-column>
+              <el-table-column
+                prop="teamName"
+                label="班组"
+                align="center"
+                prop="remark">
+                 <template slot-scope="scope">
+                  <div v-clamp="1">{{scope.row.teamName}}</div>
+                </template>
+              </el-table-column>
+              
+              <el-table-column
+                label="准入时间"
+                align="center"
+                prop="operAtimesStr">
+                 <template slot-scope="scope">
+                  <div v-clamp="1">{{scope.row.operAtimesStr}}</div>
+                </template>
+              </el-table-column>
+            </el-table>
+          
+          </div>
+           <div v-if="persionData">
+              <div  class="flexInit w100">
+                <div class="flexInit flex1 flex-column" style="height:150px">
+                  <div class="flexInit  w100"  style="align-items: center">
+                    <div class="myTitle oneTxt">姓名：</div>
+                    <div class="flex1  gray flexInit"  v-clamp="1">{{persionData.operatorName}}</div>
+                  </div>
+                
+                  <div class="flexInit w100" style="align-items: center">
+                    <div class="myTitle oneTxt">区域：</div>
+                    <div class="flex1  gray flexInit"  v-clamp="1">
+                      {{persionData.areaName}}
+                    </div>
+                  </div>
+                  
+                  <div class="flexInit  w100"  style="align-items: center">
+                    <div class="myTitle oneTxt">数据更新时间：</div>
+                    <div class="flex1  gray flexInit" v-clamp="1" :key="persionData.time">
+                      {{ persionData.time}}
+                    </div>
+                  </div>
+                  
+                  <div class="flexInit  w100"  style="align-items: center">
+                      <el-button type="text" @click="getPersonline(persionData)">查看人员轨迹</el-button>
+                  </div>
+                  
+                </div>
+                <div>
+                  <el-image 
+                  style="width: 150px; height: 150px"
+                  :preview-src-list="['${rc.contextPath}/sys/attach/api/toSeePicture.html?method=toSeePicture&attId='+persionData.photoAtt]" 
+                  :src="'${rc.contextPath}/sys/attach/api/toSeePicture.html?method=toSeePicture&attId='+persionData.photoAtt">
+                </el-image>
+  
+                </div>
+              </div>
+              
+              
+           </div>
+          
+        </el-dialog>
+        
+        
+      </div>
+    </div>
+  </div>
+  
+
+</body>
+<#include "../comTree.htm">
+<#include "../comMenu.htm">
+<script src="<@sp.static/>/moltran/assets/js/fa.js"></script>
+<script type="text/javascript">
+var initDay = myTime(new Date().getTime(),'yyyy-MM-dd');
+var initMonth = myTime(new Date().getTime(),'yyyy-MM');
+var initYear = myTime(new Date().getTime(),'yyyy');
+var yDay = myTime(new Date(new Date().setDate(new Date().getDate() - 1)).getTime(),'yyyy-MM-dd');
+
+  var vm = new Vue({
+     el:'#app',
+     watch: {
+          filterText:function(val) {
+             this.$refs.tree.filter(val);
+          }
+     },
+     filters:{
+          myTime:function(val,fmt){
+            var Dates = new Date(parseInt(val));
+            var o = {
+                'M+':Dates.getMonth()+1,
+                'd+':Dates.getDate(),
+                'h+':Dates.getHours(),
+                'm+':Dates.getMinutes(),
+                's+':Dates.getSeconds(),
+                'q+':Math.floor((Dates.getMonth()+3)/3),
+                'S+':Dates.getMilliseconds()
+              }
+              if(/(y+)/.test(fmt)){
+                fmt = fmt.replace(RegExp.$1,(Dates.getFullYear()+'').substring(4-RegExp.$1.length))
+              }
+              for(var k in o){
+                if(o.hasOwnProperty(k)){
+                  if(new RegExp('('+k+')').test(fmt)){
+                    fmt = fmt.replace(RegExp.$1,RegExp.$1.length==1?o[k]:('00'+o[k]).substring((''+o[k]).length))
+                  }
+                }
+              }
+              return fmt;
+          }
+        },
+     data() {
+        return {
+          currentIndex:0,
+          showTree:getTreeShowState(),
+          idlist:[],
+          name_ID:'',
+          name_operateId:'',
+          operatorNamelist:[],
+          loading:false,
+          hideswitchArr:[],
+          timer:null,
+          currentNode:'',
+          type:'operType',
+          showTypeCurrent:0,
+          startTime: '00:00',
+            endTime: '23:00',
+          endDates:{
+            disabledDate:function (time) {
+                return time.getTime() > Date.now()
+           }
+          },
+          beginDate:{
+            disabledDate:function(){}
+          },
+          endDate:{
+            disabledDate:function(){}
+          },
+          range:[initDay,initDay],
+          dtime:initDay,
+          mtime:initMonth,
+          ytime:initYear,
+          datype:'date',
+          tableData:[],
+            multipleSelection: [],
+          allnumdatas:null,
+
+          once:true,
+          search:{
+            state:[]
+          },
+          menuCurrentIndex:0, 
+          menulist:[],
+          page:{
+            totalCount:100,
+            pageSize:10000,
+            pageOffset:1
+            },
+            tableData:[],
+           
+            height:300,
+            canvasheight:500,
+          maxWidth:innerWidth -450,
+          kqstatecurrent:'',
+          myChart:null,
+          canvas:null,
+          panning:false,
+          panning2:false,
+          showAble:false,
+          timer:null,
+          addressArr:[],
+          personArr:[],
+          sum:0,
+          switchArr:[],
+          canvasNotData:true,
+          canvasNotData2:true,
+          changmenushow:true,
+          innerMaxWidth:innerWidth,
+          canvasClickxy:null,
+          
+          
+          pdata:null, // 区域信息
+          tipVisible:false,
+          persionData:null,
+          
+          attId:'',
+        pointers:[],
+        areas:[],
+        resouces:[],
+        img: null,
+        titles:'',
+        canvas2:null,
+        attId2:'',
+        plineslist:[],
+        templines:[],
+        tempPId:'',
+        tempCanvasData:{},
+        dellines:[],
+        img:null
+        
+        }
+      },
+      beforeDestory(){
+        clearInterval(this.timer);
+        this.timer = null;
+      },
+      created(){
+        
+          var img = new Image()
+              img.onload = () => {
+                this.img = img
+              }
+          img.src = '<@sp.static/>/moltran/assets/css/images/s/gr.png';
+          
+          var arrMenu = setPermission();
+          var tempArr = [];
+          if(arrMenu && arrMenu['ryfb']){
+            tempArr.push({
+              label:'人员分布',value:'0',url:'/position/queryList.html',classStr:'icon-huaban-'
+            })
+          }
+          tempArr.push({
+            label:'人员轨迹',value:'2',url:'/position/queryList.html',classStr:'icon-qiandaoguiji'
+          })  
+          if(arrMenu && arrMenu['yqgj']){
+            tempArr.push({
+              label:'越区告警',value:'1',url:'/position/getCrossZoneAlarm.html',classStr:'icon-hj1'
+            })
+          }
+          
+          this.menulist = tempArr;
+  
+          var that = this;
+           // disabledDate 为true表示不可选,false表示可选
+          this.beginDate.disabledDate = function (time) {
+            let endDateVal = that.range[1];
+                if (endDateVal) {
+                  return time.getTime() > new Date(endDateVal).getTime() || time.getTime()  < new Date(endDateVal).setFullYear((new Date(endDateVal).getFullYear()-1));
+                }else{
+                  return time.getTime() > Date.now() || time.getTime() < new Date().setFullYear((new Date().getFullYear()-1))
+                }
+                
+              
+          };
+          this.endDate.disabledDate = function (time) {
+            if(that.range[0]){
+              return new Date(that.range[0]+' 00:00:00').getTime() > time.getTime() 
+            }else{
+              return time.getTime() > Date.now()
+            }
+           
+          };
+            
+        
+            
+               
+      },
+      computed:{
+        contentTopWidth:function(){
+          return this.innerMaxWidth - (this.showTree?250:0) - (this.changmenushow?200:40);
+        }
+      },
+      mounted:function() {
+          var that = this;
+          this.initEndHours();
+          this.initSize();
+          window.onresize = function(){
+            that.initSize();
+          }
+        this.initCanvas();
+       
+        /* this.getIdcard(); */
+      },
+      methods: {
+        changeName(v){
+          this.name_ID = '';
+          this.idlist = [];
+          var item = this.operatorNamelist.filter((item)=>{
+            return item.operateId == v
+          });
+          if(item && item[0] && item[0].operatorName){
+            this.getIdcard(item[0].operatorName)
+          }
+          
+          /* this.tempPId = v;
+          this.getPersonline() */
+        },
+        getOperatorName() {
+          var that = this;
+          var datas = {
+              operatorName:'',
+              proId:this.currentNode.id
+          }
+          new_com_ajaxPost('${rc.contextPath}/bwssWlProOper/queryProOperList.html', datas, null,function(res) {
+              if(res && res.code == 200){
+                that.operatorNamelist = res.obj;
+                that.name_operateId = res.obj?res.obj[0].operateId:'';
+              }
+          },null,true);
+        },
+        getIdcard(operatorName) {
+          var that = this;
+          var datas = {
+              operatorName:operatorName,
+              proId:this.currentNode.id
+          }
+          new_com_ajaxPost('${rc.contextPath}/bwssWlProOper/queryProOperList.html', datas, null,function(res) {
+              if(res && res.code == 200){
+                that.idlist = res.obj;
+                that.name_ID = res.obj?res.obj[0].operateId:'';
+              }
+          },null,true);
+        },
+        remoteMethodOperatorName(operatorName) {
+              if (operatorName !== '') {
+                this.loading = true;
+                var that = this;
+            var datas = {
+                operatorName:operatorName,
+                proId:this.currentNode.id
+            }
+            new_com_ajaxPost('${rc.contextPath}/bwssWlProOper/queryProOperList.html', datas, null,function(res) {
+              that.loading = false;
+                if(res && res.code == 200){
+                  that.operatorNamelist = res.obj;
+                }
+            },null,true);
+              } else {
+                this.options = [];
+              }
+        },
+        remoteMethodIdcard(idcard) {
+              if (idcard !== '') {
+                this.loading = true;
+                var that = this;
+            var datas = {
+                idcard:idcard,
+                proId:this.currentNode.id
+            }
+            new_com_ajaxPost('${rc.contextPath}/bwssWlProOper/queryProOperList.html', datas, null,function(res) {
+              that.loading = false;
+                if(res && res.code == 200){
+                  that.idlist = res.obj;
+                }
+            },null,true);
+              } else {
+                this.options = [];
+              }
+        },
+        getPersonline(){
+          if(!this.name_operateId && !this.name_ID){
+            this.$message.error('请先选择姓名或者身份证号！')
+            return false;
+          }
+          var that = this;
+          var tempstartTime = this.dtime +' '+ this.startTime+':00';
+            var tempendTime = this.dtime +' '+ this.endTime +':59';
+          var datas = {
+              operateId:this.name_ID?this.name_ID:this.name_operateId,
+              proId:this.currentNode.id,
+              beginTime:tempstartTime?new Date(tempstartTime.replace(/-/g, '/')).getTime():'',
+                endTime:tempendTime?new Date(tempendTime.replace(/-/g, '/')).getTime():''
+              
+          }
+          new_com_ajaxPost('${rc.contextPath}/bg/position/queryPersonnelTrajectory', JSON.stringify(datas), null,function(res) {
+              if(res && res.code == 200){
+                that.plineslist = res.obj;
+                that.$nextTick(()=>{
+                  that.showlines()
+                })
+                
+              }
+          },{'contentType' :'application/json'},true);
+        },
+        animationPoint(x,y){
+          
+          var list = this.canvas2.getObjects();
+          var tempObj = null;
+          var that = this;
+          for(var i = 0; i < list.length; i++){
+             if(list[i].tempTyle == "tempCircle"){
+               tempObj = list[i];
+             }
+          }
+          if(!tempObj){
+            return false;
+          }
+          var maxTime = Math.max(x*3,y*3)
+          return new Promise(function(resolve, reject){
+            tempObj.animate('left', x, {
+                  duration: maxTime,
+                  onChange: that.canvas2.renderAll.bind(that.canvas2),
+                  onComplete: function() {
+                    resolve()
+                  }
+                
+              });
+            tempObj.animate('top', y, {
+                  duration: maxTime,
+                  onChange: that.canvas2.renderAll.bind(that.canvas2),
+                  onComplete: function() {
+                    resolve()
+                  }
+                 
+              });
+          })
+          
+        },
+        showImg:function(x,y,txt,data,name){
+          var that = this;
+          var point = new fabric.Image( this.img, {
+              left: x - 10 ,
+                top: y - 10,
+                scaleX: 0.4,
+                scaleY: 0.4,
+                angle: 0,
+                hasControls: false,
+                  selectable: false
+              });
+              point.toObject = (function(toObject) {
+                    return function() {
+                      return fabric.util.object.extend(toObject.call(this), {
+                        datas: this.datas,
+                          myType:this.myType,
+                          tempTyle:this.tempTyle
+                      });
+                    };
+                  })(point.toObject)
+
+                  point.datas = data;
+          point.myType = "pCircle";
+          point.tempTyle = txt;
+          that.canvas2 && that.canvas2.add(point);
+          if(txt != 'pCircle'){
+            this.dellines.push(point)
+          }
+          this.tempCanvasData[name] = point;
+          this.templines.push(point)
+        },
+        showlines(){
+          var that = this;
+          this.currentIndex = 0;
+          this.templines.forEach((item)=>{
+            this.canvas2.remove(item)
+          });
+          that.dellines.forEach((item)=>{
+             that.canvas2.remove(item);
+          });
+          that.dellines = [];
+          this.templines = []
+          if(that.plineslist.length > 1){
+            this.goPointer()
+          }
+          
+        },
+        goPointer(){
+          var that = this;
+          if(that.currentIndex < that.plineslist.length){
+            var x1 = parseInt(that.plineslist[that.currentIndex].pixelX);
+            var y1 = parseInt(that.plineslist[that.currentIndex].pixelY);
+            var x2 = parseInt(that.plineslist[that.currentIndex+1].pixelX);
+            var y2 = parseInt(that.plineslist[that.currentIndex+1].pixelY);
+            that.drawPointer(x1,y1,'startCircle',that.plineslist[that.currentIndex],'names'+that.currentIndex)
+            that.showImg(x1,y1,'tempCircle',that.plineslist[that.currentIndex],'namest'+that.currentIndex)
+            
+             that.animationPoint(x2,y2 ).then(()=>{
+                  that.removeCanvas('names'+that.currentIndex);
+                that.removeCanvas('namest'+that.currentIndex);
+                 that.dellines.forEach((item)=>{
+                   that.canvas2.remove(item);
+                }) ;
+                 that.dellines = []
+              //划线
+                var polyline = new fabric.Line([x1,y1,x2,y2], {
+                　　fill: 'green',
+                　　stroke: 'green',    //笔触颜色
+                　　strokeWidth: 2,//笔触宽度
+                  hasControls: false,
+                           selectable: false
+                })
+                that.templines.push(polyline);
+                that.canvas2 && that.canvas2.add(polyline);
+                that.drawPointer(x1,y1,'pCircle',that.plineslist[that.currentIndex],'pCircle'+that.currentIndex)
+                
+                if(that.currentIndex == that.plineslist.length -2){
+                  that.showImg(x2,y2,'pCircle',that.plineslist[that.currentIndex+1],'pCircle'+that.currentIndex)
+                }else{
+                  that.drawPointer(x2,y2,'pCircle',that.plineslist[that.currentIndex+1],'pCircle'+that.currentIndex)
+                }
+                
+                
+                that.currentIndex++;
+                if(that.currentIndex < that.plineslist.length){
+                  this.goPointer()
+                }
+             })
+          }
+        },
+        removeCanvas(txt){
+          
+          if(this.tempCanvasData[txt]){
+            this.canvas2.remove(this.tempCanvasData[name]);
+          }
+        },
+        drawPointer(x,y,txt,data,name){
+          var that = this;
+          var point = new fabric.Circle({
+              radius: 6,
+                      fill: 'blue',
+                      left: x - 6,
+                      top: y - 6,
+                      name: "pCircle",
+                      hasControls: false,
+                      selectable: false
+          });
+          point.toObject = (function(toObject) {
+                  return function() {
+                    return fabric.util.object.extend(toObject.call(this), {
+                      datas: this.datas,
+                      myType:this.myType,
+                      tempTyle:this.tempTyle
+                    });
+                  };
+                })(point.toObject);
+          point.datas = data;
+          point.myType = "pCircle";
+          point.tempTyle = txt;
+          that.canvas2 && that.canvas2.add(point);
+          if(txt != 'pCircle'){
+            this.dellines.push(point)
+          }
+          this.tempCanvasData[name] = point;
+          this.templines.push(point)
+        },
+        
+        gettitles:function(){
+           var str;
+           if(this.datype == 'date'){
+             var tempstartTime = this.dtime +' '+ this.startTime;
+               var tempendTime = this.dtime +' '+ this.endTime;
+               str = tempstartTime +'至'+tempendTime;
+            }
+            if(this.datype == 'month'){
+              str = this.mtime
+            }
+            if(this.datype == 'year'){
+              str = this.ytime;
+            }
+            if(this.datype == 'def'){
+              if(new Date(this.range[0]) <= new Date(this.range[1])){
+                str = this.range[0] +'至'+this.range[1];
+              }else{
+                str = '';
+              }
+              
+            }
+            if(this.currentNode && this.currentNode.type != 'project'){
+              return ' ';
+            }
+            var str2 = this.currentNode?this.currentNode.name:'';
+            if(str2.length>20){
+              this.titles = '【'+(str2.slice(0,20)+'...')+'】'+str+'越区人次统计'+(this.showTypeCurrent == 0?'图':'表');
+            }else{
+              this.titles = '【'+str2+'】'+str+'越区人次统计'+(this.showTypeCurrent == 0?'图':'表');
+            }
+             
+        },
+        getPData:function(){
+            if(this.currentNode && this.currentNode.type != 'project'){
+              return;
+            }
+            var that = this;
+            var url = '${rc.contextPath}/bg'+this.menulist[this.menuCurrentIndex].url; 
+            var datas = {};
+            datas = {
+                type:this.type,
+                proId:this.currentNode.id
+              }
+            this.tempswitchArr = JSON.parse(JSON.stringify(this.switchArr));
+            com_ajaxPost(url, datas, null,function(res) {
+                  that.sum = 0;
+                  that.switchArr = [];
+                  that.personArr  = [];
+              if(res ){
+                if(that.menulist[that.menuCurrentIndex].value == 0){
+                  var tempArr = [];
+                  var tempPerce = 0;
+                  if( res.obj && res.obj.length){
+                    res.obj.forEach(function(item){
+                      if(item.data.length){
+                        that.sum += item.data.length;
+                        that.switchArr.push(item.name);
+                        for(var i = 0; i < item.data.length; i++){
+                          item.data[i].time  =  myTime(item.data[i].time,'yyyy-MM-dd hh:mm:ss')
+                        }
+                        tempArr.push({
+                          label:item.name,
+                          child:item.data,
+                          len:item.data.length,
+                          percentage:0,
+                          colour:item.data.length?item.data[0].colour:'gray'
+                        })
+                      }
+                      
+                    })
+                  }
+                  if(tempArr.length){
+                    for(var i = 1 ; i < tempArr.length; i++){
+                      var temppercentage = Math.round(tempArr[i].len/that.sum * 100);
+                      tempArr[i].percentage = temppercentage;
+                      tempPerce += temppercentage;
+                    }
+                    tempArr[0].percentage = Math.round(100-tempPerce)
+                    that.personArr = tempArr;
+                  }
+                  that.showPinters()
+                }
+              }
+            
+          },null,true);
+          },
+        setMYInterval:function(){
+          
+           if(this.menulist[this.menuCurrentIndex].value == 1){ 
+            if(this.timer){
+              clearInterval(this.timer)  
+            }
+           return;
+            }else{
+              if(this.timer){
+              clearInterval(this.timer)  
+            };
+              this.timer = setInterval(()=>{
+               this.getPData();
+           },5000)
+            } 
+          
+        
+        },
+        initData2(){
+          var that = this;
+            var url = '${rc.contextPath}/item/map/api/queryMapData.html'; 
+            var datas = {
+                proId : this.currentNode.id
+            }
+            this.canvas2 && this.canvas2.clear();
+            that.attId2 = '';
+            /* that.areas = [];
+            that.resouces = [];
+             */
+            new_com_ajaxPost(url, datas, null,function(res) {
+            if(res && res.code == 200){
+              
+              that.attId2 = res.obj.attId || ''
+               /* if(res.obj.ctrlCoords && res.obj.ctrlCoords.length){
+                 that.pointers = res.obj.ctrlCoords
+               }
+              
+                      if(res.obj.areas && res.obj.areas.length){
+                        that.areas = res.obj.areas.map(area => {
+                          return Object.assign(area, { points: area.coords.sort((a, b) => a.sort - b.sort).map(p => ({ x: +p.xCoordPixel, y: +p.yCoordPixel })) })
+                        })
+                      }
+                      if(res.obj.mapEquips && res.obj.mapEquips.length){
+                         that.resouces = res.obj.mapEquips.map(equip => {
+                          const { id, equipId, coord } = equip
+                          const { xCoordPixel: left, yCoordPixel: top } = coord
+                          return { id, equipId, left, top }
+                        })
+                      } */
+                     
+                      that.canvas2 && that.canvas2.clear();
+              that.initCanvas_two();
+            }
+          },null,true);    
+          },
+        initData(){
+        var that = this;
+          var url = '${rc.contextPath}/item/map/api/queryMapData.html'; 
+          var datas = {
+              proId : this.currentNode.id
+          }
+          this.canvas.clear();
+          that.attId = '';
+          that.areas = [];
+          that.resouces = [];
+          
+          new_com_ajaxPost(url, datas, null,function(res) {
+          if(res && res.code == 200){
+            
+            that.attId = res.obj.attId || ''
+             if(res.obj.ctrlCoords && res.obj.ctrlCoords.length){
+               that.pointers = res.obj.ctrlCoords
+             }
+            
+                    if(res.obj.areas && res.obj.areas.length){
+                      that.areas = res.obj.areas.map(area => {
+                        return Object.assign(area, { points: area.coords.sort((a, b) => a.sort - b.sort).map(p => ({ x: +p.xCoordPixel, y: +p.yCoordPixel })) })
+                      })
+                    }
+                    if(res.obj.mapEquips && res.obj.mapEquips.length){
+                       that.resouces = res.obj.mapEquips.map(equip => {
+                        const { id, equipId, coord } = equip
+                        const { xCoordPixel: left, yCoordPixel: top } = coord
+                        return { id, equipId, left, top }
+                      })
+                    }
+                   
+                    that.canvas.clear();
+            that.init();
+          }
+        },null,true);
+          
+          
+                  
+        },
+        init:function(){
+          this.canvasNotData = !this.attId;
+        
+          this.initMapImage();
+          this.initAreas();
+          //this.initPoints(); 
+          
+        },
+        
+        initAreas() {
+              this.areas.forEach((area, i) => {
+                const { coords, points: ps, areaCode, areaName, areaType, accessCount, id } = area
+                const points = ps || coords.map(p => {
+                  return { x: +p.xCoordPixel, y: +p.yCoordPixel }
+                })
+                      const myArea = new fabric.Polygon(points, Object.assign({
+                        stroke: areaType === 'danger_area' ? 'red' : 'blue',
+                        strokeWidth: 2,
+                        fill: areaType === 'danger_area' ? 'rgb(228, 60, 60)' : 'rgb(52, 13, 218)',
+                        hasControls: false,
+                        name: 'area',
+                        opacity: .3,
+                        selectable: false
+                      }, { areaCode, areaName, areaType, accessCount, id }))
+                this.canvas.add(myArea)
+              })
+            },
+            
+            initPoints() {
+              this.pointers.forEach((p, i) => {
+                const { xCoordUwb, yCoordUwb, latitude, longitude, xCoordPixel, yCoordPixel, name } = p
+                    const point = new fabric.Circle(Object.assign({
+                        radius: 6,
+                        fill: 'blue',
+                        left: xCoordPixel - 3,
+                        top: yCoordPixel - 3,
+                        name: "pointerCircle",
+                        hasControls: false,
+                        selectable: false
+                      }, { xCoordUwb, yCoordUwb, latitude, longitude, xCoordPixel, yCoordPixel }))
+/*                    this.$set(this.pointers, i, point) */
+                /* if (name) this.canvas.remove(p) */
+                    this.canvas.add(point)
+                  })
+            },
+            initMapImage2() {
+                var that = this;
+                if (!this.attId2) return false
+                const url = '${rc.contextPath}/bg/bwssEquipMaintent.html?method=toSeePicture&attId=' + this.attId2
+                const image = new Image()
+                    image.onload = () => {
+                      const { width, height} = image
+                     // const { width: cw, height: ch } = this.$refs.canvas
+                      this.canvas2.setBackgroundImage(
+                          url,
+                          this.canvas2.renderAll.bind(this.canvas2),
+                          { width, height, top: 0, left: 0 }
+                      );
+                      var canvasel2 = document.getElementById('canvas2');
+                      var canvasStyle = {
+                          'width':canvasel2.width,   
+                          'height':canvasel2.height
+                      }
+                      var bl = width/height - canvasStyle.width/canvasStyle.height;
+                      if(bl >= 0){
+                        scale = canvasStyle.width /  width;
+                      }else{
+                        scale = canvasStyle.height /  height;
+                      }
+                      
+                      var zoomPoint = new fabric.Point(0, 0);
+                      
+                      this.canvas2.zoomToPoint(zoomPoint, scale);
+                      
+                      that.canvas2.on("mouse:down", function(e) {
+                    if(that.panning2){
+                      that.panning2 = false;
+                    }
+                    that.panning2 = true;
+                    
+                    if(e && e.target){
+                      that.persionData = null; 
+                      that.pdata = null; 
+                      if(e.target.myType == "pCircle"){ 
+                        console.log(e.target.datas)
+                        e.target.datas.time && that.$message('时间：'+myTime(e.target.datas.time,'yyyy-MM-dd hh:mm:ss'))
+                        //that.showTipPointer({x:e.e.clientX,y:e.e.clientY},e.target,e)
+                      }
+                    }
+                  });
+                      
+                  that.canvas2.on("mouse:up", function(e) {
+                    that.panning2 = false;
+                  });
+                  
+                      that.canvas2.on("mouse:move", function(e) {
+                    if(e.target ){
+                      e.target.selectable = false;
+                       } 
+                      if (that.panning2 && e && e.e) {
+                        var x = e.e.movementX;
+                          var y = e.e.movementY;
+                          var delta = new fabric.Point(x, y);
+                          that.canvas2.relativePan(delta)
+                      }
+                  });
+                  
+                  that.canvas2.on("mouse:wheel", function(e) {
+                    var pointer = e.pointer;
+                   var event = e.e || window.event
+                  
+                   if(that.panning2){
+                     return;
+                   }
+                    var zoom = (event.deltaY > 0 ? -0.05 : 0.05) + that.canvas2.getZoom();
+                    zoom = Math.max(0.2, zoom); 
+                    zoom = Math.min(2, zoom); 
+                    var zoomPoint = new fabric.Point(pointer?pointer.x:0, pointer?pointer.y:0);
+                    that.canvas2.zoomToPoint(zoomPoint, zoom);
+                  });   
+                  
+                    }
+                    image.src = url
+              },
+            initMapImage() {
+              if (!this.attId) return false
+              const url = '${rc.contextPath}/bg/bwssEquipMaintent.html?method=toSeePicture&attId=' + this.attId
+              const image = new Image()
+                  image.onload = () => {
+                    const { width, height} = image
+                   // const { width: cw, height: ch } = this.$refs.canvas
+                    this.canvas.setBackgroundImage(
+                        url,
+                        this.canvas.renderAll.bind(this.canvas),
+                        { width, height, top: 0, left: 0 }
+                    );
+                    
+                    var canvasStyle = {
+                        'width':this.contentTopWidth-20,   
+                        'height':this.canvasheight +10
+                    }
+                    var bl = width/height - canvasStyle.width/canvasStyle.height;
+                    if(bl >= 0){
+                      scale = canvasStyle.width /  width;
+                    }else{
+                      scale = canvasStyle.height /  height;
+                    }
+                    
+                    
+                 /*    const movePoint = new fabric.Point( canvasStyle.width/2-width*scale/2, canvasStyle.height/2-height*scale/2);
+                    this.canvas.relativePan(movePoint); */
+                    
+                    var zoomPoint = new fabric.Point(0, 0);
+                    
+                    this.canvas.zoomToPoint(zoomPoint, scale);
+                    this.initEvent();
+                    this.showPinters();
+                  }
+                  image.src = url
+            },
+        changmenu:function(){
+          this.changmenushow = !this.changmenushow;
+         /*  this.initCanvas(); */
+
+          if(this.currentNode && this.currentNode.type == 'project'){
+            if(this.menulist[this.menuCurrentIndex].value == 1){
+              this.getAddressArr();
+              }
+             
+            }else{
+              if(this.menulist[this.menuCurrentIndex].value == 1){
+                this.showline([],[],[]); 
+               if(this.showTypeCurrent == 1){
+                 this.tableData = [];
+               }
+            }
+            if(this.menulist[this.menuCurrentIndex].value == 0){
+              //this.canvas.clear();
+              this.personArr = [];
+            }
+            }
+          
+        },
+        getqueryMapAreaOperPage:function(obj){
+          var that = this;
+            var url = '${rc.contextPath}/item/map/api/queryMapAreaOperPage.html'; 
+            var datas = {
+                proId : this.currentNode.id
+            }
+            new_com_ajaxPost(url, datas, null,function(res) {
+            if(res){
+              
+            }
+          },null,true);
+        },
+        go:function(){
+          var obj = {
+            label:'工程信息维护',
+              imgUrl:'<@sp.static/>/moltran/assets/css/images/s/8.png',
+              url:'${rc.contextPath}/page.html?method=informationMaintenanceView&tab_index=3'
+          };
+          parent.addNewTab(obj.label,obj.url) 
+        },
+        initEndHours:function(){
+          if(this.dtime == initDay){
+            this.startTime = '00:00';
+            this.endTime = new Date().getHours() + ':59';
+          }else{
+            this.startTime = '00:00';
+            this.endTime = '23:59';
+          }
+          
+        },
+        hasOwn:function(arr,name){
+          for(var i = 0 ; i < arr.length; i++){
+            if(arr[i] == name){
+              return false;
+            }
+          }
+          return true;
+        },
+        clearGroup:function(){
+          var templist = this.canvas.getObjects();
+          for(var i = 0 ; i < templist.length ; i++){
+            if(templist[i].myType == "lastAdd"){
+              this.canvas.remove(templist[i]);
+            }
+          } 
+        },
+        showPinters:function(){
+         this.clearGroup();
+          if(this.personArr && this.personArr.length > 0){
+            for(var i = 0; i < this.personArr.length; i++){
+              this.showGroupPointer(this.personArr[i])
+            }
+          } 
+        },
+        initswitchClick:function(){
+          for(var i = 0; i < this.switchArr.length; i++){
+             if( this.hideswitchArr.includes(this.switchArr[i])){
+               this.showOrHide(this.switchArr[i],true)
+             }
+          }
+          
+        },
+        switchClick:function(item){
+          var Index = this.switchArr.indexOf(item.label);
+          if(Index == -1){
+            this.showOrHide(item.label,true)
+            this.switchArr.push(item.label); 
+          }else{
+            this.showOrHide(item.label,false)
+            this.switchArr.splice(Index,1);  
+          }
+          var hideIndex = this.hideswitchArr.indexOf(item.label);
+          if(hideIndex != -1){
+            this.hideswitchArr.splice(hideIndex,1);
+          }else{
+            this.hideswitchArr.push(item.label);
+          }
+        },
+        showOrHide:function(name,key){
+           var list = this.canvas.getObjects();
+          list.forEach(function(item){
+            if(item.name == name && item.myType == "lastAdd"){
+              item.set('visible',key)
+            }
+          });
+          this.canvas.requestRenderAll() 
+        },
+        showGroupPointer:function(obj){
+          var tempArr = [];
+          var flag = true;
+          if( this.hideswitchArr.includes(obj.label)){
+            flag = false;
+          }
+          
+          if(obj && obj.child && obj.child.length>0){
+            for(var j = 0; j < obj.child.length; j++){
+                 this.showPonter({
+                        visible:flag,
+                    name:obj.label,
+                    x:obj.child[j].pixelX,
+                    y:obj.child[j].pixelY,
+                    color:obj.child[j].colour,
+                    datas:obj.child[j],
+                    operateId:obj.child[j].operateId
+                  })
+            }
+          }
+        },
+        showPonter:function(obj){
+             var circle =  new fabric.Circle({
+                        left: obj.x,
+                        top: obj.y,
+                        radius: 6,
+                        selectable: false,
+                        fill: obj.color,
+                        objectCaching: false,
+                      });
+                    circle.toObject = (function(toObject) {
+                      return function() {
+                        return fabric.util.object.extend(toObject.call(this), {
+                        operateId:this.operateId,
+                          name:this.name,
+                          datas:this.datas,
+                          myType:this.myType
+                        });
+                      };
+                    })(circle.toObject)
+                    circle.operateId = obj.operateId;
+                    circle.name = obj.name;
+                    circle.myType = "lastAdd";
+                    circle.datas = obj.datas;
+                    this.canvas.add(circle);
+                    if(!obj.visible){
+                      this.showOrHide(obj.name,obj.visible)
+                    }
+                    
+        },
+        getAddressArr:function(){
+            this.getData();
+            return false;
+            if(this.currentNode && this.currentNode.type != 'project'){
+              return;
+            }
+            var that = this;
+            var url = '${rc.contextPath}/bg/position/queryCrossRegionList.html'; 
+            var datas = {
+                
+            }
+            
+            if(this.datype == 'date'){
+              tempstartTime = this.dtime +' '+ this.startTime;
+              tempendTime = this.dtime +' '+ this.endTime;
+              /* var temp = new Date().getTime() - (new Date(tempendTime.replace(/-/g, '/'))).getTime();
+              if(temp < 0){
+                that.$message.error('结束时间不能大于当前时间！');
+                return false;
+              } */
+            }
+            if(this.datype == 'month'){
+              tempstartTime = this.mtime
+              tempendTime = '';
+            }
+            if(this.datype == 'year'){
+              tempstartTime = this.ytime
+              tempendTime = '';
+            }
+            if(this.datype == 'def'){
+              if(!this.getRandTime()){
+                return false
+              }else{
+                tempstartTime = this.range[0] +' 00:00:00'
+                tempendTime = this.range[1]+' 23:59:59';
+              }
+            }
+            
+            datas = {
+              beginTime:tempstartTime?new Date(tempstartTime.replace(/-/g, '/')).getTime():'',
+              endTime:tempendTime?new Date(tempendTime.replace(/-/g, '/')).getTime():'',
+              proId : this.currentNode.id,
+              dataType:this.showTypeCurrent == 0?"chart":"table",
+              timeType:this.datype == 'date'?'day':this.datype,
+              client:"web"
+            }
+            
+            that.addressArr = [];
+            new_com_ajaxPost(url, datas, null,function(res) {
+            if(res){
+              
+              that.addressArr = res.obj;
+              var tempArr = []
+              if(that.search.state){
+                for(var i = 0; i < that.search.state.length;i++){
+                  for(var j = 0; j < res.obj.length;j++){
+                    if(res.obj[j].regionId == that.search.state[i]){
+                      tempArr.push(that.search.state[i]);
+                    }
+                  }
+                }
+                that.search.state = tempArr;
+              }else{
+                that.search.state = [];
+              }
+        
+              that.getData();
+              
+            }
+          },null,true);
+        },
+        isInPolygon(checkPoint, polygonPoints) {
+            var counter = 0;
+            var i;
+            var xinters;
+            var p1, p2;
+            var pointCount = polygonPoints.length;
+            p1 = polygonPoints[0];
+
+            for (i = 1; i <= pointCount; i++) {
+                p2 = polygonPoints[i % pointCount];
+                if (
+                    checkPoint.x > Math.min(p1.x, p2.x) &&
+                    checkPoint.x <= Math.max(p1.x, p2.x)
+                ) {
+                    if (checkPoint.y <= Math.max(p1.y, p2.y)) {
+                        if (p1.x != p2.x) {
+                            xinters =
+                                (checkPoint.x - p1.x) *
+                                    (p2.y - p1.y) /
+                                    (p2.x - p1.x) +
+                                p1.y;
+                            if (p1.y == p2.y || checkPoint.y <= xinters) {
+                                counter++;
+                            }
+                        }
+                    }
+                }
+                p1 = p2;
+            }
+            if (counter % 2 == 0) {
+                return false;
+            } else {
+                return true;
+            }
+        },
+            getObjPosition () {
+              var canvasel = document.getElementById('canvas');
+              var rect = canvasel.getBoundingClientRect();
+              return rect;
+          },
+          toolClick:function(fnName,key){
+            if(key && this.multipleSelection.length == 0){
+              this.$message.error('请选择您要操作的记录!');
+              return;
+            }
+            this[fnName]()
+          },
+        initCanvas_two(){
+           
+           var that = this;
+           var min = 99;
+             var max = 999999;
+           var canvasel2 = document.getElementById('canvas2');
+           canvasel2.width = innerWidth - 290 - (this.changmenushow?200:40);
+             canvasel2.height = innerHeight - 50 -80;
+           fabric.Object.prototype.setControlsVisibility({
+                  bl: false, // 左下
+                  br: false, // 右下
+                  mb: false, // 下中
+                  ml: false, // 中左
+                  mr: false, // 中右
+                  mt: false, // 上中
+                  tl: false, // 上左
+                  tr: false, // 上右
+                  mtr: false // 旋转控制键
+              });
+            that.canvas2 = new fabric.Canvas("canvas2");
+            
+            that.canvas2.selection = false;
+            that.$nextTick(()=>{
+              that.canvasNotData2 = !this.attId2;
+              that.initMapImage2()
+            })
+            
+            
+        },
+        initCanvas:function() {
+           var that = this;
+           var min = 99;
+             var max = 999999;
+           var canvasel = document.getElementById('canvas');
+           canvasel.width = innerWidth - 550 - (this.changmenushow?200:40);
+             canvasel.height = innerHeight - 50;
+           fabric.Object.prototype.setControlsVisibility({
+                  bl: false, // 左下
+                  br: false, // 右下
+                  mb: false, // 下中
+                  ml: false, // 中左
+                  mr: false, // 中右
+                  mt: false, // 上中
+                  tl: false, // 上左
+                  tr: false, // 上右
+                  mtr: false // 旋转控制键
+              });
+            that.canvas = new fabric.Canvas("canvas",{preserveObjectStacking:true});
+            that.canvas.selection = false;
+              that.initEvent();    
+        },
+        showTipPointer:function(xyObj,data,e){
+          //console.log(xyObj) 
+          var  that = this;
+          
+          this.persionData = data.datas;
+          var  str = '';
+          this.areas.forEach(function(item){
+            if(that.isInPolygon(e.absolutePointer,item.points)){
+              str+=item.areaName;
+            }
+          });
+          this.persionData.areaName = str;
+          this.tipVisible = true;
+          this.setPosition('ptip',xyObj)
+        },
+        showTipMulLine:function(xyObj,data,e){
+          //console.log(xyObj)
+          //console.log(data)
+          if(data.id){
+            this.getTipMulLine(data.id,xyObj)
+          }
+          
+        },
+        getTipMulLine:function(areaId,xyObj,e){
+          var that = this;
+            var url = '${rc.contextPath}/item/map/api/queryMapAreaById.html'; 
+            var datas = {
+                id:areaId
+            }
+            new_com_ajaxPost(url, datas, null,function(res) {
+            if(res && res.code == 200){
+               that.tipVisible = true;
+                 that.pdata = res.obj;
+                 
+                 that.setPosition('ptip',xyObj)
+            }
+          },null,true);
+        },
+        setPosition:function(cName,xyObj){
+            var w = $('.'+cName+' .el-dialog').width();
+              var h = $('.'+cName+' .el-dialog').height();
+              
+              var midX,midY,top,left;
+              midX = xyObj.x+10;
+              midY = xyObj.y+10;
+              
+              //var coords = this.getObjPosition();
+              top = midY;
+              left = midX;
+              
+              if(midY + h> innerHeight){
+                 top = midY - h -10;
+              }
+              if(midX + w > innerWidth){
+                 left = midX - w - 10;
+              }
+              //console.log({top: top, left: left})
+             /*  
+              if(this.persionData){
+                $('.'+cName+' .el-dialog').css({top: top, left: left,margin:0,width:'400px'});
+              }else{
+                $('.'+cName+' .el-dialog').css({top: top, left: left,margin:0,width:'30%'});
+              } */
+             
+        },
+        initEvent:function(){
+          var that = this;
+              that.canvas.on("mouse:down", function(e) {
+              // console.log(e)
+                if(that.panning){
+                  that.panning = false;
+                }
+                that.panning = true;
+              if(e && e.target){
+                that.persionData = null; 
+                that.pdata = null; 
+                if(e.target.myType == "lastAdd"){
+                  that.showTipPointer({x:e.e.clientX,y:e.e.clientY},e.target,e)
+                }
+                if(e.target.type == "polygon"){
+                  if(!that.isInPolygon(e.absolutePointer,e.target.points)){
+                    return false;
+                  }else{
+                    that.showTipMulLine({x:e.e.clientX,y:e.e.clientY},e.target,e)
+                  }
+                }
+
+                /* if(that.timer){
+                  clearTimeout(that.timer)
+                }
+                that.timer = setTimeout(function(){
+                  that.showTops(e,e.target.s_datas);
+                },200) */
+              }
+              
+                
+              });
+              that.canvas.on("mouse:up", function(e) {
+                that.panning = false;
+              });
+              
+              that.canvas.on("object:moving", function(e) {
+                if(e.target ){
+                      return false;
+                   } 
+              })
+              that.canvas.on("mouse:move", function(e) {
+            
+                if(e.target ){
+                  e.target.selectable = false;
+                   } 
+                
+                if (that.panning && e && e.e) {
+                  
+                  var x = e.e.movementX;
+                    var y = e.e.movementY;
+                    if(!!that.canvasClickxy) {
+                        x = e.e.screenX - that.canvasClickxy.e.screenX;
+                        y = e.e.screenY - that.canvasClickxy.e.screenY;
+                    }
+                    var delta = new fabric.Point(x, y);
+                    that.canvas.relativePan(delta)
+                  
+                }
+                that.canvasClickxy = e;
+              });
+              
+              that.canvas.on("mouse:wheel", function(e) {
+                var pointer = e.pointer;
+               var event = e.e || window.event
+              
+               if(that.panning){
+                 return;
+               }
+                var zoom = (event.deltaY > 0 ? -0.05 : 0.05) + that.canvas.getZoom();
+                
+                zoom = Math.max(0.2, zoom); 
+                zoom = Math.min(2, zoom); 
+                var zoomPoint = new fabric.Point(pointer?pointer.x:0, pointer?pointer.y:0);
+                //var zoomPoint = new fabric.Point(event.pageX, event.pageY);
+                
+                that.canvas.zoomToPoint(zoomPoint, zoom);
+                //that.canvas.setZoom(zoom)
+                that.setCircles()
+              });
+        },
+        setCircles:function(){
+             var list = this.canvas.getObjects();
+              for(var i = 0; i < list.length; i++){
+                if(list[i].type == 'circle'){
+                   list[i].set({'radius':7/this.canvas.getZoom()});
+                }
+              }
+          },
+        showEchart:function(id,options){
+          
+          if(!this.myChart){
+            this.myChart  = echarts.init(document.getElementById(id),'light');
+          }
+          this.myChart.setOption(options,true); 
+        },
+        
+        showline:function(typelist,titlelist,datalist){
+            var that = this;
+          this.showEchart('zx',{
+            title:{
+              left:'center',
+              text:this.titles
+            },
+              tooltip: {
+                  trigger: 'axis',
+                  axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                      type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                  },
+                  formatter: (params) => { // params为悬浮框上的全部数据
+                    
+                      const newParams = [];
+                      let paramsData = params; 
+                      paramsData.forEach((p) => {
+                        
+                       // p.marker为对应数据线的颜色的圆点 
+                       // p.seriesName为对应数据的数据名称
+                       // p.value为对应数据的值
+                       if(!!p.value){
+                         const cont = p.marker + ' ' + p.seriesName + ': ' + p.value + '<br/>'; 
+                         newParams.push(cont);
+                       }
+                       
+                      });
+                      return newParams.join(' '); // 这里是需要将数组转化成字符串显示，如果不转化，每个数据前面都会出现一个逗号（，），_.join为lodash的方法
+                     }
+              },
+              legend: {
+                  data: titlelist,
+                  x:'center',      //可设定图例在左、右、居中
+                  y:'bottom',
+                  type: 'scroll',
+                  padding: 2,
+                    textStyle: { 
+                        fontSize: 12,
+                    }
+              },
+               grid: {
+                  left: '3%',
+                  right: '4%',
+                  bottom: '20',
+                  containLabel: true
+              },
+              yAxis: {
+                minInterval:1,
+                  type: 'value'
+              },
+              xAxis: {
+                  type: 'category',
+                  data: typelist
+              },
+              series: datalist
+          });
+        },
+        showTypeClick:function(index){
+          this.showTypeCurrent = index;
+          this.getData();
+        },
+        diffTimeDay:function(oldTime, newTime) {
+          var timeDiff = (new Date(newTime.replace(/-/g, '/'))).getTime() - (new Date(oldTime.replace(/-/g, '/'))).getTime()
+          var formatTimeDiff = timeDiff / (3600 * 1000)/24
+          return formatTimeDiff
+        },
+        changestartDate:function(e){
+          var that = this;
+          if(e && this.range[1]){
+            if(this.diffTimeDay(e,this.range[1]) > 365){
+              that.$message.error('时间跨度不能超过365天！');
+            }
+          }
+          
+          if(this.range[1] && e){
+            if(this.diffTimeDay(this.range[1],e) > 0){
+              that.$message.error('起始时间不能大于结束时间！');
+            }
+          }
+          
+         /*  this.$set(this.endDate,'disabledDate',function (time) {
+              return new Date(new Date(that.range[0]).setDate(new Date(that.range[0]).getDate() - 1)).getTime() > time.getTime() || time.getTime() > Date.now();
+          }); */
+        },
+        changeendDate:function(e){
+           var that = this;
+          if(e && this.range[1]){
+            if(this.diffTimeDay(this.range[0],e) > 365){
+              that.$message.error('时间跨度不能超过365天！');
+            }
+          }
+          
+          if(this.range[0] && e){
+            if(this.diffTimeDay(e,this.range[0]) > 0){
+              that.$message.error('起始时间不能大于结束时间！')
+            }
+          }
+          
+         /*  this.$set(this.beginDate,'beginDate',function (time) {
+              return Math.min(new Date(that.range[1]).getTime(),Date.now()) <= time.getTime() 
+          })  */
+        },
+       
+          tooldc:function(){ //导出
+          if(this.showTypeCurrent == 0 && this.menulist[this.menuCurrentIndex].value == 1){
+           this.downLoadImg(this.myChart.getDataURL(),'xxxxxxx')
+          }
+        },
+        downLoadImg:function(url,name){
+          var oA = document.createElement("a");
+          oA.download = name?name:'';// 设置下载的文件名，默认是'下载'
+          oA.href = url;
+          document.body.appendChild(oA);
+          oA.click();
+          oA.remove(); 
+        },
+        handleNodeClick:function(data) {  
+          this.currentNode = data;
+          var that = this;
+          if(data && data.type == 'project'){
+            if(this.menulist[this.menuCurrentIndex].value == 1){
+              clearInterval(this.timer);
+                this.timer = null;
+              this.getAddressArr();
+              }else if(this.menulist[this.menuCurrentIndex].value == 0){
+                this.getData();
+                this.setMYInterval()
+              }else if(this.menulist[this.menuCurrentIndex].value == 2){
+                clearInterval(this.timer);
+                this.timer = null;
+                this.initData2();
+                this.getOperatorName();
+              }
+            }else{
+              if(that.menulist[that.menuCurrentIndex].value == 1){
+                that.showline([],[],[]); 
+               if(that.showTypeCurrent == 1){
+                 that.tableData = [];
+               }
+               that.addressArr = [];
+               that.search.state = [];
+            }
+            if(that.menulist[that.menuCurrentIndex].value == 0){
+               that.personArr = [];
+               that.clearGroup();
+            }
+            }
+        },
+        doubleGet:function(){
+          var data = this.currentNode;
+          var that = this;
+          if(data && data.type == 'project'){
+            if(this.menulist[this.menuCurrentIndex].value == 1){
+              this.getAddressArr();
+              }
+              this.getData();
+            }else{
+              if(that.menulist[that.menuCurrentIndex].value == 1){
+                that.showline([],[],[]); 
+               if(that.showTypeCurrent == 1){
+                 that.tableData = [];
+               }
+            }
+            if(that.menulist[that.menuCurrentIndex].value == 0){
+              
+               that.personArr = [];
+               taht.clearGroup();
+            }
+            }
+        },
+        getperson:function(){
+          this.hideswitchArr = [];
+          if(this.currentNode && this.currentNode.type == 'project'){
+              this.getData();
+            }else{
+              this.$message('请选择工程！');
+            } 
+        },
+        filterNode:function(value, data) {
+              if (!value) return true;
+              return data.label.indexOf(value) !== -1;
+        },
+        initSize:function(){
+          this.maxWidth = innerWidth -450;
+          this.canvasheight = innerHeight -145;
+          this.innerMaxWidth  = innerWidth;
+            this.setHeight();
+        },
+        setHeight:function(){
+            var that = this;
+             this.$nextTick(function(){
+               if(this.menulist[this.menuCurrentIndex].value == 1){
+                 that.height = innerHeight -$('.content-box').height() - 120;
+               }else{
+                 that.height = innerHeight - 15;
+               }
+                 
+              
+             })
+            
+          },
+          handleSizeChange:function(val) {
+            this.page.pageSize = val;
+              this.page.pageOffset = 1;
+              this.getData();
+            },
+            handleCurrentChange:function(val) {
+              this.page.pageOffset = val;
+              this.getData();
+            },
+          getData:function(){
+            if(this.currentNode && this.currentNode.type != 'project'){
+              return;
+            }
+            var that = this;
+            var url = '${rc.contextPath}/bg'+this.menulist[this.menuCurrentIndex].url; 
+            var datas = {};
+            if(this.menulist[this.menuCurrentIndex].value == 1){
+              
+              
+              if(this.datype == 'date'){
+                tempstartTime = this.dtime +' '+ this.startTime+':00';
+                tempendTime = this.dtime +' '+ this.endTime +':59';
+              }
+              if(this.datype == 'month'){
+                tempstartTime = this.mtime
+                tempendTime = '';
+              }
+              if(this.datype == 'year'){
+                tempstartTime = this.ytime
+                tempendTime = '';
+              }
+              if(this.datype == 'def'){
+                if(!this.getRandTime()){
+                  return false
+                }else{
+                  tempstartTime = this.range[0]+' 00:00:00'
+                  tempendTime = this.range[1] +' 23:59:59';
+                }
+              }
+              
+              datas = {
+                beginTime:tempstartTime?new Date(tempstartTime.replace(/-/g, '/')).getTime():'',
+                endTime:tempendTime?new Date(tempendTime.replace(/-/g, '/')).getTime():'',
+                proId : this.currentNode.id,
+                regionIds : this.search.state,
+                dataType:this.showTypeCurrent == 0?"chart":"table",
+                timeType:this.datype == 'date'?'day':this.datype,
+                client:"web"
+              }
+            }else if(this.menulist[this.menuCurrentIndex].value == 0){
+              datas = {
+                type:this.type,
+                proId:this.currentNode.id
+              }
+            }
+            this.gettitles();
+            
+            this.loading = true;
+            
+            com_ajaxPost(url, datas, null,function(res) {
+                  that.loading = false;
+                  that.sum = 0;
+                  that.switchArr = [];
+              if(res ){
+                if(that.menulist[that.menuCurrentIndex].value == 1){
+                  if(res.obj){
+                    
+                    var  titlelist = [];
+                    var  typelist = [];
+                    var  datalist = [];
+                    
+                    if(res.obj && res.obj.length>0 && res.obj[0].child.length>0){
+                      for(var i = 0; i < res.obj[0].child.length; i++){
+                        typelist.push(res.obj[0].child[i].number);
+                      }
+                    }
+                    for(var i = 0; i < res.obj.length; i++){
+                      titlelist.push(res.obj[i].regionName);
+                      var templist = [];
+                      for(var k = 0 ; k < res.obj[i].child.length;k++){
+                        templist.push(res.obj[i].child[k].num)
+                      }
+                      datalist.push({
+                              name: res.obj[i].regionName,
+                              type: 'bar',
+                              stack: 'bw',
+                              data: templist
+                          },)
+                    }
+                     that.showline(typelist,titlelist,datalist); 
+                     if(that.showTypeCurrent == 1){
+                       that.tableData = res.obj;
+                     }
+                    
+                  }
+                }
+                if(that.menulist[that.menuCurrentIndex].value == 0){
+                  that.initData();
+                  var tempData = res.obj;
+                  var tempArr = [];
+                  var tempPerce = 0;
+                  that.personArr = [];
+                  
+                  if( res.obj && res.obj.length){
+                    res.obj.forEach(function(item){
+                      if(item.data.length){
+                        that.sum += item.data.length;
+                        that.switchArr.push(item.name);
+                        for(var i = 0; i < item.data.length; i++){
+                          item.data[i].time  =  myTime(item.data[i].time,'yyyy-MM-dd hh:mm:ss')
+                        }
+                        tempArr.push({
+                          label:item.name,
+                          child:item.data,
+                          len:item.data.length,
+                          percentage:0,
+                          colour:item.data.length?item.data[0].colour:'gray'
+                        })
+                      }
+                      
+                    })
+                  }
+                  if(tempArr.length){
+                    for(var i = 1 ; i < tempArr.length; i++){
+                      var temppercentage = Math.round(tempArr[i].len/that.sum * 100);
+                      tempArr[i].percentage = temppercentage;
+                      tempPerce += temppercentage;
+                    }
+                    tempArr[0].percentage = Math.round(100-tempPerce)
+                    that.personArr = tempArr;
+                    
+                  }
+                  that.showPinters()
+                }
+              }
+            
+          },null,true);
+          },
+          getRandTime:function(){
+            var tempstartTime = this.range[0]
+              var tempendTime = this.range[1];
+            if(!tempstartTime || !tempendTime){
+              this.$message.error('起始时间结束时间不能为空！');
+              return false;
+            }
+            if(this.diffTimeDay(this.range[0],this.range[1]) > 365){
+                this.$message.error('时间跨度不能超过365天！');
+              return false;
+            }
+            if(this.diffTimeDay(this.range[0],this.range[1]) < 0){
+                this.$message.error('起始时间不能大于结束时间！');
+              return false;
+          }
+            return true;
+        },
+        searchClick:function(key){
+         if(key == 1){
+              this.range = [initDay,initDay];
+              this.mtime = initMonth;
+              this.ytime = initYear;
+              this.dtime = initDay;
+              this.initEndHours();
+              this.name_operateId ='';
+              this.name_ID = '';
+              
+           this.search = {
+               state:[]
+              };
+         }
+         
+         if(this.menulist[this.menuCurrentIndex].value ==  2){
+              this.getPersonline();
+              return false;
+           }
+         this.getAddressArr();
+        },
+       
+        clearPage:function(){
+          this.datype = 'date';
+          this.range = [initDay,initDay];
+          this.dtime = initDay;
+          this.mtime = initMonth;
+          this.ytime = initYear;
+          this.initEndHours();
+          this.beginDate.disabledDate = function (time) {
+            return time.getTime() > Date.now()
+          };
+          this.endDate.disabledDate = function (time) {
+            return time.getTime() > Date.now()
+          };
+          this.page = {
+              totalCount:0,
+              pageSize:10,
+              pageOffset:1
+              };
+          this.search = {
+            state:[]
+          };
+        },
+        changeMenuCurrentIndex:function(index){
+          
+          
+          this.menuCurrentIndex = index;
+          this.initSize();
+          this.range = [initDay,initDay];
+          this.mtime = initMonth;
+          this.ytime = initYear;
+          this.beginDate.disabledDate = function (time) {
+            return time.getTime() > Date.now()
+          };
+          this.endDate.disabledDate = function (time) {
+            return time.getTime() > Date.now()
+          };
+          this.clearPage();
+          if(this.menulist[this.menuCurrentIndex].value == 2){
+            clearInterval(this.timer);
+              this.timer = null;
+              this.$nextTick(()=>{
+                this.initData2();
+                this.getOperatorName();
+              })
+            
+          }
+          if(this.currentNode && this.currentNode.type == 'project'){
+            if(this.menulist[this.menuCurrentIndex].value == 1){
+              clearInterval(this.timer);
+                this.timer = null;
+              this.getAddressArr();
+              
+            }
+            if(this.menulist[this.menuCurrentIndex].value ==  0){
+              this.showline();
+              
+              this.getData();
+              this.setMYInterval();
+            }  
+          }
+        }
+      }
+      
+  })
+</script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="css/favicon.ico">
+    <link type="text/css" rel="styleSheet" href="css/elementui.css"/>
+    <link type="text/css" rel="styleSheet" href="css/swiper.min.css"/>
+    <link type="text/css" rel="styleSheet" href="css/colpick.css"/>
+    <link type="text/css" rel="styleSheet" href="css/style.css"/>
+    <title></title>
+    <style>
+
+      .el-input-number--small {
+          width: 99px;
+          line-height: 30px;
+          margin: 2px;
+      }
+      body{
+          background: gray;
+      }
+      .sbr{
+           border-style: dotted;
+           border-width: 0.5px;
+           margin: 10px 5px;
+           padding: 5px;
+           box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body >
+    
+    <div 
+    class="s_app  flex flex-row" 
+    id="app" 
+    v-cloak > 
+
+        <div style="width:450px;height:100%;overflow-y: auto;" class="h100">
+          设置总列数：
+          <el-input-number size="small"  v-model="colnum" @change="handleChange" :min="1" :step="1" :max="12" label=""></el-input-number>
+          <div class="sbr">总列数宽度比例：
+            <span v-for="(item,index) in layoutArrs" :key="index+'a'">
+              <el-input-number v-model="item.columnW" size="small" :min="1" label=""></el-input-number>
+            </span>
+          </div>
+
+          <div v-for="(item,index) in layoutArrs" :key="index">  
+               <div class="sbr">
+                  第{{index+1}}列总行数：<el-input-number size="small"  :min="1" v-model="item.num"  @change="rowNChange(item.num,index,$event)"   label=""></el-input-number>
+                  <div>
+                    第{{index+1}}列总行高度比例：
+                    <span   v-for="(item2,index2) in item.children" >
+                       <el-input-number v-model="item2.rowH" size="small" :min="1" label=""></el-input-number>
+                    </span>
+                  </div>
+               </div>
+
+                <div class="sbr">
+                    <div   v-for="(item2,index2) in item.children" >
+                       第{{index+1}}列-第{{index2+1}}行-总列数：
+                       <el-input-number size="small"  :min="1" v-model="item2.num" 
+                        @change="rowNChange2(item2.num,index,index2,$event)"   label=""></el-input-number>
+                        <div>
+                          第{{index+1}}列-第{{index2+1}}行-总列数宽度比例：
+                          <span   v-for="(item3,index3) in item2.children" >
+                             <el-input-number v-model="item3.columnW" size="small"  :min="1" label=""></el-input-number>
+                          </span>
+                        </div>
+                    </div>
+                  </div>
+          </div>
+
+
+          
+          
+            <div>大背景颜色：<el-color-picker v-model="s_styles.defaultColor" size="mini"></el-color-picker> </div>
+            <div>模块背景颜色：<el-color-picker v-model="s_styles.defaultBoxColor" size="mini"></el-color-picker> </div>
+            <div>图表文字以及坐标轴颜色：<el-color-picker v-model="s_styles.defaultFontColor" size="mini"></el-color-picker> </div>
+            <div>边框颜色选择：<el-color-picker v-model="s_styles.defaultbrColor"  size="mini"></el-color-picker> </div>
+            <div>边框圆角：<el-input-number v-model="s_styles.defaultBoxRaius" :step="1" size="small"></el-input-number> </div>
+
+          <div>
+            图表距上<el-input-number v-model="s_styles.defaultGrid.top" :step="1" size="small"></el-input-number> 
+          </div>
+          <div>
+            图表距左<el-input-number v-model="s_styles.defaultGrid.left" :step="1" size="small"></el-input-number> 
+          </div>
+          <div>
+            图表距右<el-input-number v-model="s_styles.defaultGrid.right" :step="1" size="small"></el-input-number> 
+          </div>
+
+          <div>
+            模块间距：<el-input-number v-model="s_styles.defaultBoxPadding" size="small"></el-input-number> 
+          </div>
+          <div>
+            模块阴影：<el-input style="width:120px" placeholder="black 0px 0px 10px" v-model="s_styles.defaultBoxShadow" size="small" title="提示阴影格式 black 0px 0px 10px"></el-input> 
+          </div>
+        </div>
+
+
+        <div 
+          class="flex1 flex flex-column h100" 
+          v-for="(item,index) in layoutArrs" 
+          :key="index" 
+          :style="{
+          'flex': item.columnW,
+          'background-color':s_styles.defaultColor?s_styles.defaultColor:'#1a2749'
+        }">
+           <div class="flex flex-row h100 w100" v-for="(item2,index2) in item.children" :key="index2" :style="{'flex': item2.rowH}">
+              <div v-for="(item3,index3) in item2.children" :key="index3"  :style="{'flex': item3.columnW}" class="h100">
+                    <div class="s_item pv" 
+                      :style="{
+                        'padding':s_styles.defaultBoxPadding?s_styles.defaultBoxPadding/2+'px':'5px'
+                      }">
+                          <div :id="item2.id"  class="s_box"  
+                          :style="{
+                          'border-color':s_styles.defaultbrColor?s_styles.defaultbrColor:'#15EDCE',
+                          'border-radius':s_styles.defaultBoxRaius+'px',
+                          'background-color':s_styles.defaultBoxColor?s_styles.defaultBoxColor:'#1a2749',
+                          'box-shadow':s_styles.defaultBoxShadow?s_styles.defaultBoxShadow:'initial'}">
+                            <span class="tbadd"></span>
+                          </div>
+                    </div>        
+              </div>
+          </div>
+         
+        </div>
+
+
+        <div style="position: fixed;bottom:20px;right:20px;">
+         
+          <el-button type="success" @click="saveIt" icon="el-icon-check" circle title="保存并预览"></el-button>
+          <el-button type="danger" @click="delIt" icon="el-icon-delete" circle title="删除"></el-button>
+        </div>
+    </div>
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script src="js/colpick.js"></script>
+    <script src="js/common.js"></script>
+    <script type="text/javascript" src="js/vue.js"></script>
+    <script type="text/javascript" src="js/elementui.js"></script>
+
+
+    <script>
+      var vm = new Vue({
+        el:'#app',
+        data(){
+          return {
+            colnum:1,
+            layoutArrs:[
+                {
+                  'columnW':1, //大列宽度比例
+                  'num':1,
+                  'children':[{
+                    'rowH':1,  //大列各行高度比例
+                    'num':1,
+                    'children':[
+                       {
+                        'columnW':1, //大列某行各列宽度比例
+                        'id':this.genID()
+                       }
+                    ]
+                  }]
+                }
+            ],
+            s_styles:{
+                defaultBoxRaius:1,
+                defaultbrColor:'#15EDCE',
+                defaultBoxShadow:'',
+                defaultColor:'rgb(26, 39, 73)',
+                defaultBoxColor:'rgb(26, 39, 73)',
+                defaultFontColor:'#ffffff',
+                defaultBoxPadding:5,
+                defaultGrid:{
+                  left:40,
+                  right:40,
+                  top:40
+                }
+            }
+           
+          }
+        },
+        created(){
+        },
+        computed:{
+            
+        },
+        mounted(){
+           $('#picker').colpick({
+              flat:true,
+              layout:'hex',
+              submit:0
+          });
+          var temp = localStorage.getItem('layout');
+          if(!!temp){
+            var tempObj = JSON.parse(temp);
+            this.colnum = tempObj.layoutArrs.length;
+            this.layoutArrs = tempObj.layoutArrs;
+            this.s_styles = tempObj.s_styles;
+          }
+        },
+        watch:{
+          
+        },
+        methods:{
+          rowNChange2:function(num,index,index2,e){
+            var temp = [];
+            var tempArr = this.layoutArrs[index].children[index2];
+            tempArr.num = num;
+            for(var i = 0;i < num;i++){
+              temp.push({
+                'columnW':1, //大列某行各列宽度比例
+                'id':this.genID()
+              })
+            }
+            tempArr.children = temp;
+          },
+          rowNChange:function(num,index,e){
+             this.layoutArrs[index].num = num;
+             var temp = [];
+
+             for(var i = 0;i < num;i++){
+              temp.push({
+                    'rowH':1,  //大列各行高度比例
+                    'num':1,
+                    'children':[
+                       {
+                        'columnW':1, //大列某行各列宽度比例
+                        'id':this.genID()
+                       }
+                    ]
+                  })
+            }
+            this.layoutArrs[index].children  = temp;
+          },
+
+          delIt:function(){
+            this.$confirm('此操作将删除当前布局, 是否继续?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }).then(() => {
+              this.clearData();
+            }).catch(() => {
+                       
+            });
+          },
+          clearData:function(){
+            this.colnum = 1;
+            this.layoutArrs = [
+                {
+                  'columnW':1, //大列宽度比例
+                  'num':1,
+                  'children':[{
+                    'rowH':1,  //大列各行高度比例
+                    'num':1,
+                    'children':[
+                       {
+                        'columnW':1, //大列某行各列宽度比例
+                        'id':this.genID()
+                       }
+                    ]
+                  }]
+                }
+            ];
+            this.s_styles = {
+                defaultBoxRaius:1,
+                defaultbrColor:'#15EDCE',
+                defaultBoxShadow:'',
+                defaultColor:'rgb(26, 39, 73)',
+                defaultBoxColor:'rgb(26, 39, 73)',
+                defaultFontColor:'#ffffff',
+                defaultBoxPadding:5,
+                defaultGrid:{
+                  left:40,
+                  right:40,
+                  top:40
+                }
+            }
+          },
+          
+          saveIt:function(){
+            var datas = {
+              layoutArrs:this.layoutArrs,
+              s_styles:this.s_styles
+            }
+            localStorage.setItem('layout',JSON.stringify(datas))
+            location.href ="./binddata.html";
+          },
+          
+          fontArrIndex:function(arr,item,key){
+              for(var i = 0 ; i < arr.length; i++){
+                if(arr[i][key] === item[key]){
+                  return i
+                }
+              }
+              return -1;
+          },
+         
+          genID:function(length){
+            return Number(Math.random().toString().substr(3,length) + Date.now()).toString(36);
+          },
+          handleChange(e){
+            this.layoutArrs = [];
+            for(var i = 0; i < e;i++){
+              this.layoutArrs.push({
+                  'columnW':1, //大列宽度比例
+                  'num':1,
+                  'children':[{
+                    'rowH':1,  //大列各行高度比例
+                    'num':1,
+                    'children':[
+                       {
+                        'columnW':1, //大列某行各列宽度比例
+                        'id':this.genID()
+                       }
+                    ]
+                  }]
+                })
+            }
+          }
+        }
+      })
+    </script>
+  </body>
+</html>
