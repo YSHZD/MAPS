@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">
+  <style>
+    .main{
+		position:relative;
+	}
+	.star_line{
+		/*  设置强制不换行 */
+		width-space: nowrap;
+		overflow: hidden;
+		position: absolute;
+	}
+	.star{
+		display: inline-block;
+		/* 设置当鼠标放到星星上是变成小手样式 */
+		cursor: pointer
+	}
+
+  </style>
+</head>
+<body>
+
+<div id="app">
+
+<v-star :score="1.5" disabled/>
+<v-star :score="3.6" disabled showText/>
+<v-star :score.sync="curScore" showText/>
+
+<template id="v-star">
+   <div class="rate" :class="{'disabled':disabled}">
+    <i v-for="i in 5" 
+    class="iconfont" 
+    @mouseenter="disabled?'':curScore=i" 
+    @mouseleave="disabled?'':curScore=''" 
+    @click="disabled?'':setScore(i)" 
+    :class="getClass(i)">
+      
+      <i v-if="disabled && i==Math.floor(score)+1" class="iconfont icon-star" :style="'width:'+width"></i>
+    </i>
+    <span v-if="showText" class="text">{{curScore||score}}分</span>
+  </div>
+</template>
+</div>
+
+
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+
+<script>
+
+ Vue.component("v-star",{
+        template:"#v-star",
+        name:'vStar',
+	    props: {
+	      score: {
+	        type: Number,
+	        default: 0,
+	        //required: true
+	      },
+	      disabled: {
+	        type: Boolean,
+	        default: false,
+	      },
+	      showText: {
+	        type: Boolean,
+	        default: false,
+	      },
+	    },
+	    data() {
+	      return {
+	        curScore: '',
+	        width:'',
+	      }
+	    },
+	    created: function () {
+	      this.getDecimal();
+	    },
+	    methods: {
+	      getClass(i) {
+	        if (this.curScore === '') {
+	          return i <= this.score ? 'icon-star' : 'icon-star-o'
+	        } else {
+	          return i <= this.curScore ? 'icon-star' : 'icon-star-o'
+	        }
+	      },
+	      getDecimal() {
+	        this.width=Number(this.score * 100 - Math.floor(this.score) * 100)+'%';
+	      },
+	      setScore(i){
+	        this.$emit('update:score',i);//使用`.sync`修饰符，对score 进行“双向绑定
+	      }
+	    }
+	})
+var vm = new Vue({
+	    el:'#app',
+	    data(){
+	      return {
+	           curScore:3.3
+	      }
+	    },
+	    mounted(){
+	    }
+  })
+</script>
+</body>
+</html>

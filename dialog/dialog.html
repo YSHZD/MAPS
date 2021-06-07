@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">
+  <style>
+    .customClass{
+
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <el-button
+    type="primary"
+    size="small"
+    @click="dialogOpen(dialogOptions)"
+  >test</el-button>
+
+</div>
+
+<template id="TestDialog">
+  <div>
+    <p>{{ msg }}</p>
+
+    <div   class="dialog-footer" style="text-align:center;" >
+        <el-button @click="close">取 消</el-button>
+        <el-button type="primary"  >确 定</el-button>
+    </div>
+
+     <el-button
+      type="primary"
+      size="small"
+      @click="dialogOpen(dialogOptions)"
+    >test2</el-button>
+
+</div>
+  
+</template>
+
+
+<template id="TestDialogTwo">
+  <div>
+    <p>{{ msg }}</p>
+    <div  class="dialog-footer" style="text-align:center;" >
+        <el-button @click="close">取 消</el-button>
+        <el-button type="primary"  >确 定</el-button>
+    </div>
+</div>
+</template>
+
+
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+<script src="./dialog.js"></script>
+<script>
+
+  
+  let TestDialogTwo = {
+        template: '#TestDialogTwo',
+        props: {
+          msg: {
+            type: String,
+            default: ''
+          }
+        },
+        mounted:function(){
+            this.$parent.$emit('notData',300)
+        },
+        methods:{
+            close(){
+              this.$parent.$emit('update:visible', false);
+            }
+        }
+  }
+
+  let TestDialog =  {
+    template: '#TestDialog',
+    props: {
+      msg: {
+        type: String,
+        default: ''
+      }
+    },
+    data(){
+      return {
+        dialogOptions:{
+          options:{ // https://element.eleme.io/#/zh-CN/component/dialog    Attributes属性
+            title:'mytitel2',
+            closeOnClickModal:false
+            
+          },
+          bgImgSrc:'http://10.1.7.137:8080/jszsgxpt-static/b/moltran/assets/css/images/screen/pmbg.jpg',
+          componentName:TestDialogTwo, // 弹窗自定义组件名
+          componentData:{  //传递到弹窗组件数据
+            'msg': 'This is test msg two!'
+          }
+        }
+      }
+    },
+    mounted:function(){
+      console.log(this)
+    },
+    methods:{
+        close(){
+          this.$parent.$emit('update:visible', false);
+        }
+    }
+  };
+  var vm = new Vue({
+    el:'#app',
+    data(){
+      return {
+          dialogOptions:{
+            options:{ // https://element.eleme.io/#/zh-CN/component/dialog    Attributes属性
+              title:'mytitel',
+              closeOnClickModal:false,
+              beforeClose:function(done){
+                  console.log(126621)
+                  done()
+              }
+            },
+            componentName:TestDialog, // 自定义组件
+            componentData:{  //传递到弹窗组件数据
+              'msg': 'This is test msg!'
+            }
+          }
+      }
+    },
+    mounted(){
+    }
+  })
+
+  function Eat (){ return {a:2,b:3} }
+
+
+  Function.prototype.before = function (fn) {
+    return () => {
+      fn && fn(); 
+      var result = this();
+      return result
+    }
+  }
+
+  Function.prototype.after = function (fn) {
+    return () => { 
+      var result = this(); 
+      fn && fn(); 
+      return result
+    }
+  }
+
+  Eat.before(()=>console.log('before'))
+
+
+</script>
+</body>
+</html>

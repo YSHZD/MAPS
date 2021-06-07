@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">
+  <style>
+
+
+  </style>
+</head>
+<body>
+
+<div id="app">
+
+	<bw-star :value="score" :img-src="'./p1.png'" :img-a-src="'./p2.png'"></bw-star>
+	{{ score }}
+
+	
+</div>
+
+<template id="bw-star">
+	<div  
+	:style="{
+		'position': 'relative',
+    	'width': imgW * count + 'px',
+    	'height': imgH + 'px',
+    	'background': 'pink',
+    	'background-image': 'url('+ imgSrc +')',
+    	'background-position': imgPosition,
+    	'background-repeat': 'repeat',
+	}">
+		<div 
+			:style="{
+			'position': 'relative',
+	    	'width': imgW * value  + 'px',
+	    	'height': imgH + 'px',
+	    	'background': 'pink',
+	    	'background-image': 'url('+ imgASrc +')',
+	    	'background-position': imgPosition,
+	    	'background-repeat': 'repeat',
+		}"></div>
+	</div>
+</template>
+
+
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+
+<script>
+Vue.component('BwStar',{
+	template:'#bw-star',
+	props:{
+		count:{
+			type:Number,
+			default:10
+		},
+		value:{
+			type:Number,
+			default:10
+		},
+		imgSrc:{
+			type:String,
+			required:true
+		},
+		imgASrc:{
+			type:String,
+			required:true
+		}
+	},
+	computed:{
+    	imgPosition(){
+    		return `${this.imgW} px   ${this.imgH} 'px'`
+    	}
+    },
+	data(){
+		return {
+			imgW:0,
+	      	imgH:0,
+		}
+	},
+	mounted(){
+		this.init()
+	},
+	methods:{
+		init(){
+			let img = new Image();
+	    	img.onload = (e) =>{
+	    		this.imgW = img.width;
+	    		this.imgH = img.height;
+	    	}
+	    	img.src = this.imgSrc
+		}
+	}
+})
+ 
+var vm = new Vue({
+	    el:'#app',
+	    data(){
+	      	return {
+	      		score:1.2
+	      	}
+	    },
+	    computed:{
+	    	
+	    },
+	    mounted(){
+	    	setInterval(()=>{
+	    		this.score = Math.random() * 10
+	    	}, 1000)
+	    }
+  })
+</script>
+</body>
+</html>

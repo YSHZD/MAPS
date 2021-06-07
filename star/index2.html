@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">
+  <style>
+
+
+  </style>
+</head>
+<body>
+
+<div id="app">
+
+	<bw-star :value="score" :img-src="'./p1.png'" :img-a-src="'./p2.png'"></bw-star>
+	{{ score }}
+	<bw-star :value="score" :img-src="'./p1.png'" :direction = "0" :img-a-src="'./p2.png'"></bw-star>
+	{{ score }}
+	<bw-star :value="score2" :count = "1" :img-src="'./p1.png'" :direction = "0" :img-a-src="'./p2.png'"></bw-star>
+	
+</div>
+
+<template id="bw-star">
+	<div  
+	:style="{
+		'position': 'relative',
+    	'width': PWidth  + 'px',
+    	'height': PHeight + 'px',
+    	'background': 'pink',
+    	'background-image': 'url('+ imgSrc +')',
+    	'background-position': imgPosition,
+    	'background-repeat': 'repeat',
+	}">
+		<div 
+			:style="{
+			'position': 'relative',
+	    	'width': CWidth   + 'px',
+	    	'height': CHeight + 'px',
+	    	'background': 'pink',
+	    	'background-image': 'url('+ imgASrc +')',
+	    	'background-position': imgPosition,
+	    	'background-repeat': 'repeat',
+		}"></div>
+	</div>
+</template>
+
+
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+
+<script>
+Vue.component('BwStar',{
+	template:'#bw-star',
+	props:{
+		count:{
+			type:Number,
+			default:10,
+			validator (value) {
+      			return (value >= 1)
+      		}
+		},
+		direction :{
+			type: Number,
+			default: 1
+		},
+		value:{
+			type:Number,
+			default:0,
+			validator (value) {
+      			return (value < this.count)
+      		}	
+		},
+		imgSrc:{
+			type:String,
+			required:true
+		},
+		imgASrc:{
+			type:String,
+			required:true
+		}
+	},
+	computed:{
+		PWidth(){
+			return this.direction ? ( this.imgW * this.count) : this.imgW
+		},
+		PHeight(){
+			return !this.direction ? ( this.imgH * this.count) : this.imgH
+		},
+		CWidth(){
+			return this.direction ? ( this.imgW * this.value) : this.imgW
+		},
+		CHeight(){
+			return !this.direction ? ( this.imgH * this.value) : this.imgH
+		},
+    	imgPosition(){
+    		return `${this.imgW} px   ${this.imgH} 'px'`
+    	}
+    },
+	data(){
+		return {
+			imgW:0,
+	      	imgH:0,
+		}
+	},
+	mounted(){
+		this.init()
+	},
+	methods:{
+		init(){
+			let img = new Image();
+	    	img.onload = (e) =>{
+	    		this.imgW = img.width;
+	    		this.imgH = img.height;
+	    	}
+	    	img.src = this.imgSrc
+		}
+	}
+})
+ 
+var vm = new Vue({
+	    el:'#app',
+	    data(){
+	      	return {
+	      		score:0.5,
+	      		score2:0.1
+	      	}
+	    },
+	    computed:{
+	    	
+	    },
+	    mounted(){
+	    	setInterval(()=>{
+	    		this.score = Math.random() * 10
+	    	}, 1000)
+	    	setInterval(()=>{
+	    		this.score2 = Math.random() 
+	    	}, 1000)
+	    }
+  })
+</script>
+</body>
+</html>
