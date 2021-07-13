@@ -1,0 +1,1835 @@
+[1mdiff --git a/ID.html b/ID.html[m
+[1mdeleted file mode 100644[m
+[1mindex 4c235de..0000000[m
+[1m--- a/ID.html[m
+[1m+++ /dev/null[m
+[36m@@ -1,95 +0,0 @@[m
+[31m-<!DOCTYPE html>[m
+[31m-<html>[m
+[31m-<head>[m
+[31m-	<title></title>[m
+[31m-</head>[m
+[31m-<body>[m
+[31m-[m
+[31m-</body>[m
+[31m-<script>[m
+[31m-	function makerId(ymd) { [m
+[31m-        var code = '';[m
+[31m-        var ymd = ymd || 20000101; [m
+[31m-        var city={11:"北京",12:"天津",13:"河北",14:"山西",15:"内蒙古",21:"辽宁",22:"吉林",23:"黑龙江 ",31:"上海",32:"江苏",33:"浙江",34:"安徽",35:"福建",36:"江西",37:"山东",41:"河南",42:"湖北 ",43:"湖南",44:"广东",45:"广西",46:"海南",50:"重庆",51:"四川",52:"贵州",53:"云南",54:"西藏 ",61:"陕西",62:"甘肃",63:"青海",64:"宁夏",65:"新疆",71:"台湾",81:"香港",82:"澳门",91:"国外 "};[m
+[31m-        var cityId =["11", "12", "13", "14", "15", "21", "22", "23", "31", "32", "33", "34", "35", "36", "37", "41", "42", "43", "44", "45", "46", "50", "51", "52", "53", "54", "61", "62", "63", "64", "65", "71", "81", "82", "91"];[m
+[31m-        var cityIdone = cityId[Math.floor(Math.random()*(cityId.length))];[m
+[31m-        code = cityIdone.toString() + outstr(4).toString() +  ymd.toString() + outstr(3).toString();[m
+[31m-        var codetemp = code.split('');[m
+[31m-        //加权因子[m
+[31m-        var factor = [ 7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2 ];[m
+[31m-        //校验位[m
+[31m-        var parity = [ 1, 0, 'X', 9, 8, 7, 6, 5, 4, 3, 2 ];[m
+[31m-        var sum = 0;[m
+[31m-        var ai = 0;[m
+[31m-        var wi = 0;[m
+[31m-        for (var i = 0; i < 17; i++)[m
+[31m-        {[m
+[31m-            ai = codetemp[i];[m
+[31m-            wi = factor[i];[m
+[31m-            sum += ai * wi;[m
+[31m-        }[m
+[31m-        var last = parity[sum % 11];[m
+[31m-    return code + last.toString();[m
+[31m-    }[m
+[31m-[m
+[31m-[m
+[31m-	function IdentityCodeValid(code) { [m
+[31m-		console.log(code)[m
+[31m-	var code = code.toString().toUpperCase();[m
+[31m-    var city={11:"北京",12:"天津",13:"河北",14:"山西",15:"内蒙古",21:"辽宁",22:"吉林",23:"黑龙江 ",31:"上海",32:"江苏",33:"浙江",34:"安徽",35:"福建",36:"江西",37:"山东",41:"河南",42:"湖北 ",43:"湖南",44:"广东",45:"广西",46:"海南",50:"重庆",51:"四川",52:"贵州",53:"云南",54:"西藏 ",61:"陕西",62:"甘肃",63:"青海",64:"宁夏",65:"新疆",71:"台湾",81:"香港",82:"澳门",91:"国外 "};[m
+[31m-    var tip = "";[m
+[31m-    var pass= true;[m
+[31m-[m
+[31m-    if(!code || !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[012])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test(code)){[m
+[31m-        tip = "格式错误";[m
+[31m-        pass = false;[m
+[31m-    }[m
+[31m-[m
+[31m-   else if(!city[code.substr(0,2)]){[m
+[31m-        tip = "地址编码错误";[m
+[31m-        pass = false;[m
+[31m-    }[m
+[31m-    else{[m
+[31m-        //18位身份证需要验证最后一位校验位[m
+[31m-        if(code.length == 18){[m
+[31m-            code = code.split('');[m
+[31m-            //∑(ai×Wi)(mod 11)[m
+[31m-            //加权因子[m
+[31m-            var factor = [ 7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2 ];[m
+[31m-            //校验位[m
+[31m-            var parity = [ 1, 0, 'X', 9, 8, 7, 6, 5, 4, 3, 2 ];[m
+[31m-            var sum = 0;[m
+[31m-            var ai = 0;[m
+[31m-            var wi = 0;[m
+[31m-            for (var i = 0; i < 17; i++)[m
+[31m-            {[m
+[31m-                ai = code[i];[m
+[31m-                wi = factor[i];[m
+[31m-                sum += ai * wi;[m
+[31m-            }[m
+[31m-            var last = parity[sum % 11];[m
+[31m-            if(parity[sum % 11] != code[17]){[m
+[31m-                tip = "校验位错误";[m
+[31m-                pass =false;[m
+[31m-            }[m
+[31m-        }[m
+[31m-    }[m
+[31m-    return pass;[m
+[31m-}[m
+[31m-function outstr(num){[m
+[31m-        var numstr = '0123456789';[m
+[31m-        var str = '';[m
+[31m-        for(var i = 0; i < num; i++){[m
+[31m-            str+= numstr.charAt(Math.floor(Math.random()*(numstr.length)))[m
+[31m-        }[m
+[31m-        return str;[m
+[31m-    }[m
+[31m-console.log(IdentityCodeValid(makerId()))[m
+[31m-for(var i = 0 ; i < 100; i++){[m
+[31m-    var code = makerId();[m
+[31m-    if(IdentityCodeValid(code)){[m
+[31m-        document.write('<h3 style="color:#6600FF">'+code+'</h3>')[m
+[31m-    }  [m
+[31m-}[m
+[31m-</script>[m
+[31m-</html>[m
+\ No newline at end of file[m
+[1mdiff --git a/commin.js b/commin.js[m
+[1mdeleted file mode 100644[m
+[1mindex f852587..0000000[m
+[1m--- a/commin.js[m
+[1m+++ /dev/null[m
+[36m@@ -1,216 +0,0 @@[m
+[31m-Date.prototype.format = function(fmt){[m
+[31m-    let o = {[m
+[31m-        "M+":this.getMonth() + 1,[m
+[31m-        "d+":this.getDate(),[m
+[31m-        "h+":this.getHours(),[m
+[31m-        "m+":this.getMinutes(),[m
+[31m-        "s+":this.getSeconds(),[m
+[31m-        "q+":Math.floor((this.getMonth() + 3) / 3),[m
+[31m-        "S":this.getMilliseconds()[m
+[31m-    }[m
+[31m-[m
+[31m-    if (/(y+)/i.test(fmt)){[m
+[31m-        fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length))[m
+[31m-    }[m
+[31m-[m
+[31m-    for (var k in o){[m
+[31m-        if(Object.hasOwnProperty.call(o,k)){[m
+[31m-            if(new RegExp("(" + k + ")", "i").test(fmt)){[m
+[31m-                fmt = fmt.replace([m
+[31m-                    RegExp.$1,(RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length))[m
+[31m-                )[m
+[31m-            }[m
+[31m-        }[m
+[31m-    }[m
+[31m-[m
+[31m-    return fmt[m
+[31m-}[m
+[31m-[m
+[31m-export const myTime = (v,fmt) => {[m
+[31m-    return new Date(v).format(fmt)[m
+[31m-}[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-export const  util = {[m
+[31m-    _extend(to, _from) {[m
+[31m-        for (let key in _from) {[m
+[31m-            to[key] = _from[key];[m
+[31m-        }[m
+[31m-        return to;[m
+[31m-    },[m
+[31m-    _kebabCase(str) { [m
+[31m-        const hyphenateRE = /([^-])([A-Z])/g;[m
+[31m-        return str[m
+[31m-            .replace(hyphenateRE, '$1-$2')[m
+[31m-            .replace(hyphenateRE, '$1-$2')[m
+[31m-            .toLowerCase();[m
+[31m-    },[m
+[31m-    _hasOwn(obj, key) {[m
+[31m-        return hasOwnProperty.call(obj, key);[m
+[31m-    },[m
+[31m-    _trim(string){[m
+[31m-        return (string || '').replace(/^[\s\uFEFF]+|[\s\uFEFF]+$/g, '');[m
+[31m-    },[m
+[31m-    _isNumber(v){[m
+[31m-        let reg = /^[0-9]+.?[0-9]*$/;[m
+[31m-        if(reg.test(v)){[m
+[31m-            return true[m
+[31m-        }[m
+[31m-        return false[m
+[31m-    },[m
+[31m-    _isExpression(v){[m
+[31m-        let reg = /(\ud83c[\udf00-\udfff])|(\ud83d[\udc00-\ude4f\ude80-\udeff])|[\u2600-\u2B55]/g;[m
+[31m-        if(reg.test(v)){[m
+[31m-            return true[m
+[31m-        }[m
+[31m-        return false[m
+[31m-    },[m
+[31m-    _isCarID:function(value){[m
+[31m-        let reg = /([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})/[m
+[31m-        if(reg.test(value)){[m
+[31m-            return true[m
+[31m-        }[m
+[31m-        return false[m
+[31m-    },[m
+[31m-    _isIdCard: function(value) {[m
+[31m-    // 传入字符串[m
+[31m-    var idCard = value.toString();[m
+[31m-    if (idCard.length == 15) {[m
+[31m-        return this.__isValidityBrithBy15IdCard(idCard);[m
+[31m-    } else if (idCard.length == 18) {[m
+[31m-        if ([m
+[31m-        this.__isValidityBrithBy18IdCard(idCard) &&[m
+[31m-        this.__isTrueValidateCodeBy18IdCard(idCard)[m
+[31m-        ) {[m
+[31m-        return true;[m
+[31m-        } else {[m
+[31m-        return false;[m
+[31m-        }[m
+[31m-    } else {[m
+[31m-        return false;[m
+[31m-    }[m
+[31m-    },[m
+[31m-    __isTrueValidateCodeBy18IdCard: function(idCard) {[m
+[31m-    var code = idCard.toUpperCase();[m
+[31m-    var city = {[m
+[31m-        11: "北京",[m
+[31m-        12: "天津",[m
+[31m-        13: "河北",[m
+[31m-        14: "山西",[m
+[31m-        15: "内蒙古",[m
+[31m-        21: "辽宁",[m
+[31m-        22: "吉林",[m
+[31m-        23: "黑龙江 ",[m
+[31m-        31: "上海",[m
+[31m-        32: "江苏",[m
+[31m-        33: "浙江",[m
+[31m-        34: "安徽",[m
+[31m-        35: "福建",[m
+[31m-        36: "江西",[m
+[31m-        37: "山东",[m
+[31m-        41: "河南",[m
+[31m-        42: "湖北 ",[m
+[31m-        43: "湖南",[m
+[31m-        44: "广东",[m
+[31m-        45: "广西",[m
+[31m-        46: "海南",[m
+[31m-        50: "重庆",[m
+[31m-        51: "四川",[m
+[31m-        52: "贵州",[m
+[31m-        53: "云南",[m
+[31m-        54: "西藏 ",[m
+[31m-        61: "陕西",[m
+[31m-        62: "甘肃",[m
+[31m-        63: "青海",[m
+[31m-        64: "宁夏",[m
+[31m-        65: "新疆",[m
+[31m-        71: "台湾",[m
+[31m-        81: "香港",[m
+[31m-        82: "澳门",[m
+[31m-        91: "国外 "[m
+[31m-    };[m
+[31m-    var tip = "";[m
+[31m-    var pass = true;[m
+[31m-[m
+[31m-    if ([m
+[31m-        !code ||[m
+[31m-        !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[012])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test([m
+[31m-        code[m
+[31m-        )[m
+[31m-    ) {[m
+[31m-        tip = "格式错误";[m
+[31m-        pass = false;[m
+[31m-    } else if (!city[code.substr(0, 2)]) {[m
+[31m-        tip = "地址编码错误";[m
+[31m-        pass = false;[m
+[31m-    } else {[m
+[31m-        //18位身份证需要验证最后一位校验位[m
+[31m-        if (code.length == 18) {[m
+[31m-        code = code.split("");[m
+[31m-        //∑(ai×Wi)(mod 11)[m
+[31m-        //加权因子[m
+[31m-        var factor = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];[m
+[31m-        //校验位[m
+[31m-        var parity = [1, 0, "X", 9, 8, 7, 6, 5, 4, 3, 2];[m
+[31m-        var sum = 0;[m
+[31m-        var ai = 0;[m
+[31m-        var wi = 0;[m
+[31m-        for (var i = 0; i < 17; i++) {[m
+[31m-            ai = code[i];[m
+[31m-            wi = factor[i];[m
+[31m-            sum += ai * wi;[m
+[31m-        }[m
+[31m-        var last = parity[sum % 11];[m
+[31m-        if (parity[sum % 11] != code[17]) {[m
+[31m-            tip = "校验位错误";[m
+[31m-            pass = false;[m
+[31m-        }[m
+[31m-        }[m
+[31m-    }[m
+[31m-    return pass;[m
+[31m-    },[m
+[31m-    __isValidityBrithBy18IdCard: function(idCard18) {[m
+[31m-        var year = idCard18.substring(6, 10);[m
+[31m-        var month = idCard18.substring(10, 12);[m
+[31m-        var day = idCard18.substring(12, 14);[m
+[31m-        var temp_date = new Date(year, parseFloat(month) - 1, parseFloat(day));[m
+[31m-        if ([m
+[31m-            temp_date.getFullYear() != parseFloat(year) ||[m
+[31m-            temp_date.getMonth() != parseFloat(month) - 1 ||[m
+[31m-            temp_date.getDate() != parseFloat(day)[m
+[31m-        ) {[m
+[31m-            return false;[m
+[31m-        } else {[m
+[31m-            return true;[m
+[31m-        }[m
+[31m-        },[m
+[31m-        __isValidityBrithBy15IdCard: function(idCard15) {[m
+[31m-        var year = idCard15.substring(6, 8);[m
+[31m-        var month = idCard15.substring(8, 10);[m
+[31m-        var day = idCard15.substring(10, 12);[m
+[31m-        var temp_date = new Date(year, parseFloat(month) - 1, parseFloat(day));[m
+[31m-[m
+[31m-        if ([m
+[31m-            temp_date.getYear() != parseFloat(year) ||[m
+[31m-            temp_date.getMonth() != parseFloat(month) - 1 ||[m
+[31m-            temp_date.getDate() != parseFloat(day)[m
+[31m-        ) {[m
+[31m-            return false;[m
+[31m-        } else {[m
+[31m-            return true;[m
+[31m-        }[m
+[31m-    }[m
+[31m-}[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[1mdiff --git a/dialog/css/index.html b/dialog/css/index.html[m
+[1mdeleted file mode 100644[m
+[1mindex 6b34438..0000000[m
+[1m--- a/dialog/css/index.html[m
+[1m+++ /dev/null[m
+[36m@@ -1,143 +0,0 @@[m
+[31m-<!DOCTYPE html>[m
+[31m-<html>[m
+[31m-<head>[m
+[31m-  <meta charset="UTF-8">[m
+[31m-  <title>多种纯CSS样式控制导航菜单炫酷特效动画</title>[m
+[31m-  <meta name="keywords" content="多种,纯CSS样式控制,导航菜单,炫酷特效动画" />[m
+[31m-  <meta name="description" content="多种纯CSS样式控制导航菜单炫酷特效动画，使用简单，不含任何js代码，纯CSS样式控制，兼容性好。" /> [m
+[31m-  <meta name="author" content="js代码" />[m
+[31m-  <meta name="copyright" content="js代码" />[m
+[31m-  <script type="text/javascript" src="/static/js/protect.js"></script>[m
+[31m-  <link type="text/css" rel="stylesheet" href="./style.css">[m
+[31m-</head>[m
+[31m-[m
+[31m-<body>[m
+[31m-  <header>[m
+[31m-  <h1>多种纯CSS样式控制导航菜单炫酷特效动画</h1>[m
+[31m-  <span></span>[m
+[31m-</header>[m
+[31m-<div class="container red topBotomBordersOut">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container purple topBotomBordersIn">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container indigo topLeftBorders">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container blue circleBehind">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container cyan brackets">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container teal borderYtoX">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container green borderXwidth">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container lightGreen pullDown">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container lime pullUp">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container yellow pullRight">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container amber pullLeft">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container orange pullUpDown">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container deepOrange pullRightLeft">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container brown highlightTextOut">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank" alt="官网首页">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank" alt="新闻动态">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank" alt="产品服务">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank" alt="企业文化">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank" alt="联系我们">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<div class="container gray highlightTextIn">[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank" alt="官网首页">官网首页</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank" alt="新闻动态">新闻动态</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank" alt="产品服务">产品服务</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank" alt="企业文化">企业文化</a>[m
+[31m-  <a href="http://www.jsdaima.com/" target="_blank" alt="联系我们">联系我们</a>[m
+[31m-</div>[m
+[31m-[m
+[31m-<footer>[m
+[31m-  <span>©2017 js代码（http://www.jsdaima.com/） 版权所有</span>[m
+[31m-</footer>[m
+[31m-</body>[m
+[31m-</html>[m
+\ No newline at end of file[m
+[1mdiff --git a/dialog/css/style.css b/dialog/css/style.css[m
+[1mdeleted file mode 100644[m
+[1mindex 99b73ee..0000000[m
+[1m--- a/dialog/css/style.css[m
+[1m+++ /dev/null[m
+[36m@@ -1,524 +0,0 @@[m
+[31m-html, body[m
+[31m-{[m
+[31m-    margin: 0px;[m
+[31m-    font-family: 'Microsoft YaHei','Lantinghei SC','Open Sans',Arial,'Hiragino Sans GB','STHeiti','WenQuanYi Micro Hei','SimSun',sans-serif;[m
+[31m-}[m
+[31m-[m
+[31m-header, footer[m
+[31m-{[m
+[31m-    font-family: 'Microsoft YaHei','Lantinghei SC','Open Sans',Arial,'Hiragino Sans GB','STHeiti','WenQuanYi Micro Hei','SimSun',sans-serif;[m
+[31m-    margin: 0 auto;[m
+[31m-	padding: 2em 3em;[m
+[31m-	text-align: center;[m
+[31m-    background: #555;[m
+[31m-}[m
+[31m-[m
+[31m-header h1[m
+[31m-{[m
+[31m-    color: #AAA;[m
+[31m-    font-size: 40px;[m
+[31m-    font-weight: lighter;[m
+[31m-    margin-bottom: 5px;[m
+[31m-}[m
+[31m-[m
+[31m-header span[m
+[31m-{[m
+[31m-    color: #222;[m
+[31m-}[m
+[31m-[m
+[31m-footer span[m
+[31m-{[m
+[31m-  color: #AAA;[m
+[31m-}[m
+[31m-[m
+[31m-div.container[m
+[31m-{[m
+[31m-    font-family: 'Microsoft YaHei','Lantinghei SC','Open Sans',Arial,'Hiragino Sans GB','STHeiti','WenQuanYi Micro Hei','SimSun',sans-serif;[m
+[31m-    margin: 0 auto;[m
+[31m-	padding: 2em 3em;[m
+[31m-	text-align: center;[m
+[31m-}[m
+[31m-[m
+[31m-div.container a[m
+[31m-{[m
+[31m-    color: #FFF;[m
+[31m-    text-decoration: none;[m
+[31m-    font: 20px 'Microsoft YaHei','Lantinghei SC','Open Sans',Arial,'Hiragino Sans GB','STHeiti','WenQuanYi Micro Hei','SimSun',sans-serif;[m
+[31m-    margin: 0px 10px;[m
+[31m-    padding: 10px 10px;[m
+[31m-    position: relative;[m
+[31m-    z-index: 0;[m
+[31m-    cursor: pointer;[m
+[31m-}[m
+[31m-[m
+[31m-.red[m
+[31m-{[m
+[31m-    background: #f44336;[m
+[31m-}[m
+[31m-[m
+[31m-.purple[m
+[31m-{[m
+[31m-    background: #673ab7;[m
+[31m-}[m
+[31m-[m
+[31m-.indigo[m
+[31m-{[m
+[31m-    background: #3f51b5;[m
+[31m-}[m
+[31m-[m
+[31m-.blue[m
+[31m-{[m
+[31m-    background: #2196f3;[m
+[31m-}[m
+[31m-[m
+[31m-.cyan[m
+[31m-{[m
+[31m-    background: #00bcd4;[m
+[31m-}[m
+[31m-[m
+[31m-.teal[m
+[31m-{[m
+[31m-    background: #009688;[m
+[31m-}[m
+[31m-[m
+[31m-.green[m
+[31m-{[m
+[31m-    background: #4caf50;[m
+[31m-}[m
+[31m-[m
+[31m-.lightGreen[m
+[31m-{[m
+[31m-    background: #8bc34a;[m
+[31m-}[m
+[31m-[m
+[31m-.lime[m
+[31m-{[m
+[31m-    background: #c0ca33;[m
+[31m-}[m
+[31m-[m
+[31m-.yellow[m
+[31m-{[m
+[31m-    background: #fdd835;[m
+[31m-}[m
+[31m-[m
+[31m-.amber[m
+[31m-{[m
+[31m-    background: #ffc107;[m
+[31m-}[m
+[31m-[m
+[31m-.orange[m
+[31m-{[m
+[31m-    background: #ff9800[m
+[31m-}[m
+[31m-[m
+[31m-.deepOrange[m
+[31m-{[m
+[31m-    background: #ff5722;[m
+[31m-}[m
+[31m-[m
+[31m-.brown[m
+[31m-{[m
+[31m-    background: #795548;[m
+[31m-}[m
+[31m-[m
+[31m-.gray[m
+[31m-{[m
+[31m-    background: #9e9e9e;[m
+[31m-}[m
+[31m-[m
+[31m-/* Top and Bottom borders go out */[m
+[31m-div.topBotomBordersOut a:before, div.topBotomBordersOut a:after[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    left: 0px;[m
+[31m-    width: 100%;[m
+[31m-    height: 2px;[m
+[31m-    background: #FFF;[m
+[31m-    content: "";[m
+[31m-    opacity: 0;[m
+[31m-    transition: all 0.3s;[m
+[31m-}[m
+[31m-[m
+[31m-div.topBotomBordersOut a:before[m
+[31m-{[m
+[31m-    top: 0px;[m
+[31m-    transform: translateY(10px);[m
+[31m-}[m
+[31m-[m
+[31m-div.topBotomBordersOut a:after[m
+[31m-{[m
+[31m-    bottom: 0px;[m
+[31m-    transform: translateY(-10px);[m
+[31m-}[m
+[31m-[m
+[31m-div.topBotomBordersOut a:hover:before, div.topBotomBordersOut a:hover:after[m
+[31m-{[m
+[31m-    opacity: 1;[m
+[31m-    transform: translateY(0px);[m
+[31m-}[m
+[31m-[m
+[31m-/* Top and Bottom borders come in */[m
+[31m-div.topBotomBordersIn a:before, div.topBotomBordersIn a:after[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    left: 0px;[m
+[31m-    width: 100%;[m
+[31m-    height: 2px;[m
+[31m-    background: #FFF;[m
+[31m-    content: "";[m
+[31m-    opacity: 0;[m
+[31m-    transition: all 0.3s;[m
+[31m-}[m
+[31m-[m
+[31m-div.topBotomBordersIn a:before[m
+[31m-{[m
+[31m-    top: 0px;[m
+[31m-    transform: translateY(-10px);[m
+[31m-}[m
+[31m-[m
+[31m-div.topBotomBordersIn a:after[m
+[31m-{[m
+[31m-    bottom: 0px;[m
+[31m-    transform: translateY(10px);[m
+[31m-}[m
+[31m-[m
+[31m-div.topBotomBordersIn a:hover:before, div.topBotomBordersIn a:hover:after[m
+[31m-{[m
+[31m-    opacity: 1;[m
+[31m-    transform: translateY(0px);[m
+[31m-}[m
+[31m-[m
+[31m-/* Top border go down and Left border appears */[m
+[31m-div.topLeftBorders a:before[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    top: 0px;[m
+[31m-    left: 0px;[m
+[31m-    width: 2px;[m
+[31m-    height: 0px;[m
+[31m-    background: #FFF;[m
+[31m-    content: "";[m
+[31m-    opacity: 1;[m
+[31m-    transition: all 0.3s;[m
+[31m-}[m
+[31m-[m
+[31m-div.topLeftBorders a:after[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    top: 0px;[m
+[31m-    left: 0px;[m
+[31m-    width: 100%;[m
+[31m-    height: 2px;[m
+[31m-    background: #FFF;[m
+[31m-    content: "";[m
+[31m-    opacity: 1;[m
+[31m-    transition: all 0.3s;[m
+[31m-}[m
+[31m-[m
+[31m-div.topLeftBorders a:hover:before[m
+[31m-{[m
+[31m-    height: 100%;[m
+[31m-}[m
+[31m-[m
+[31m-div.topLeftBorders a:hover:after[m
+[31m-{[m
+[31m-    opacity: 0;[m
+[31m-    top: 100%;[m
+[31m-}[m
+[31m-[m
+[31m-/* Circle behind */[m
+[31m-div.circleBehind a:before, div.circleBehind a:after[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    top: 22px;[m
+[31m-    left: 50%;[m
+[31m-    width: 50px;[m
+[31m-    height: 50px;[m
+[31m-    border: 4px solid #0277bd;[m
+[31m-    transform: translateX(-50%) translateY(-50%) scale(0.8);[m
+[31m-    border-radius: 50%;[m
+[31m-    background: transparent;[m
+[31m-    content: "";[m
+[31m-    opacity: 0;[m
+[31m-    transition: all 0.3s;[m
+[31m-    z-index: -1;[m
+[31m-}[m
+[31m-[m
+[31m-div.circleBehind a:after[m
+[31m-{[m
+[31m-    border-width: 2px;[m
+[31m-    transition: all 0.4s;[m
+[31m-}[m
+[31m-[m
+[31m-div.circleBehind a:hover:before[m
+[31m-{[m
+[31m-    opacity: 1;[m
+[31m-    transform: translateX(-50%) translateY(-50%) scale(1);[m
+[31m-}[m
+[31m-[m
+[31m-div.circleBehind a:hover:after[m
+[31m-{[m
+[31m-    opacity: 1;[m
+[31m-    transform: translateX(-50%) translateY(-50%) scale(1.3);[m
+[31m-}[m
+[31m-[m
+[31m-/* Brackets go out */[m
+[31m-div.brackets a:before, div.brackets a:after[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    opacity: 0;[m
+[31m-    font-size: 35px;[m
+[31m-    top: 0px;[m
+[31m-    transition: all 0.3s;[m
+[31m-}[m
+[31m-[m
+[31m-div.brackets a:before[m
+[31m-{[m
+[31m-    content: '(';[m
+[31m-    left: 0px;[m
+[31m-    transform: translateX(10px);[m
+[31m-}[m
+[31m-[m
+[31m-div.brackets a:after[m
+[31m-{[m
+[31m-    content: ')';[m
+[31m-    right: 0px;[m
+[31m-    transform: translateX(-10px);[m
+[31m-}[m
+[31m-[m
+[31m-div.brackets a:hover:before, div.brackets a:hover:after[m
+[31m-{[m
+[31m-    opacity: 1;[m
+[31m-    transform: translateX(0px);[m
+[31m-}[m
+[31m-[m
+[31m-[m
+[31m-/* Border from Y to X  */[m
+[31m-div.borderYtoX a:before, div.borderYtoX a:after[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    opacity: 0.5;[m
+[31m-    height: 100%;[m
+[31m-    width: 2px;[m
+[31m-    content: '';[m
+[31m-    background: #FFF;[m
+[31m-    transition: all 0.3s;[m
+[31m-}[m
+[31m-[m
+[31m-div.borderYtoX a:before[m
+[31m-{[m
+[31m-    left: 0px;[m
+[31m-    top: 0px;[m
+[31m-}[m
+[31m-[m
+[31m-div.borderYtoX a:after[m
+[31m-{[m
+[31m-    right: 0px;[m
+[31m-    bottom: 0px;[m
+[31m-}[m
+[31m-[m
+[31m-div.borderYtoX a:hover:before, div.borderYtoX a:hover:after[m
+[31m-{[m
+[31m-    opacity: 1;[m
+[31m-    height: 2px;[m
+[31m-    width: 100%;[m
+[31m-}[m
+[31m-[m
+[31m-/* Border X get width  */[m
+[31m-div.borderXwidth a:before, div.borderXwidth a:after[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    opacity: 0;[m
+[31m-    width: 0%;[m
+[31m-    height: 2px;[m
+[31m-    content: '';[m
+[31m-    background: #FFF;[m
+[31m-    transition: all 0.3s;[m
+[31m-}[m
+[31m-[m
+[31m-div.borderXwidth a:before[m
+[31m-{[m
+[31m-    left: 0px;[m
+[31m-    top: 0px;[m
+[31m-}[m
+[31m-[m
+[31m-div.borderXwidth a:after[m
+[31m-{[m
+[31m-    right: 0px;[m
+[31m-    bottom: 0px;[m
+[31m-}[m
+[31m-[m
+[31m-div.borderXwidth a:hover:before, div.borderXwidth a:hover:after[m
+[31m-{[m
+[31m-    opacity: 1;[m
+[31m-    width: 100%;[m
+[31m-}[m
+[31m-[m
+[31m-/* Pull down  */[m
+[31m-div.pullDown a:before[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    width: 100%;[m
+[31m-    height: 2px;[m
+[31m-    left: 0px;[m
+[31m-    top: 0px;[m
+[31m-    content: '';[m
+[31m-    background: #FFF;[m
+[31m-    opacity: 0.3;[m
+[31m-    transition: all 0.3s;[m
+[31m-}[m
+[31m-[m
+[31m-div.pullDown a:hover:before[m
+[31m-{[m
+[31m-    height: 100%;[m
+[31m-}[m
+[31m-[m
+[31m-/* Pull up  */[m
+[31m-div.pullUp a:before[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    width: 100%;[m
+[31m-    height: 2px;[m
+[31m-    left: 0px;[m
+[31m-    bottom: 0px;[m
+[31m-    content: '';[m
+[31m-    background: #FFF;[m
+[31m-    opacity: 0.3;[m
+[31m-    transition: all 0.3s;[m
+[31m-}[m
+[31m-[m
+[31m-div.pullUp a:hover:before[m
+[31m-{[m
+[31m-    height: 100%;[m
+[31m-}[m
+[31m-[m
+[31m-/* Pull right  */[m
+[31m-div.pullRight a:before[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    width: 93px;[m
+[31m-    height: 100%;[m
+[31m-    left: 0px;[m
+[31m-    top: 0px;[m
+[31m-    content: '';[m
+[31m-    background: #FFF;[m
+[31m-    opacity: 0.3;[m
+[31m-    transition: all 0.3s;[m
+[31m-}[m
+[31m-[m
+[31m-div.pullRight a:hover:before[m
+[31m-{[m
+[31m-    width: 100%;[m
+[31m-}[m
+[31m-[m
+[31m-/* Pull left  */[m
+[31m-div.pullLeft a:before[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    width: 2px;[m
+[31m-    height: 100%;[m
+[31m-    right: 0px;[m
+[31m-    top: 0px;[m
+[31m-    content: '';[m
+[31m-    background: #FFF;[m
+[31m-    opacity: 0.3;[m
+[31m-    transition: all 0.3s;[m
+[31m-}[m
+[31m-[m
+[31m-div.pullLeft a:hover:before[m
+[31m-{[m
+[31m-    width: 100%;[m
+[31m-}[m
+[31m-[m
+[31m-/* Pull up and down  */[m
+[31m-div.pullUpDown a:before, div.pullUpDown a:after[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    width: 100%;[m
+[31m-    height: 2px;[m
+[31m-    left: 0px;[m
+[31m-    content: '';[m
+[31m-    background: #FFF;[m
+[31m-    opacity: 0.3;[m
+[31m-    transition: all 0.3s;[m
+[31m-}[m
+[31m-[m
+[31m-div.pullUpDown a:before[m
+[31m-{[m
+[31m-    top: 0px;[m
+[31m-} [m
+[31m-[m
+[31m-div.pullUpDown a:after[m
+[31m-{[m
+[31m-    bottom: 0px;[m
+[31m-}[m
+[31m-[m
+[31m-div.pullUpDown a:hover:before, div.pullUpDown a:hover:after[m
+[31m-{[m
+[31m-    height: 100%;[m
+[31m-}[m
+[31m-[m
+[31m-/* Pull right and left  */[m
+[31m-div.pullRightLeft a:before, div.pullRightLeft a:after[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    width: 2px;[m
+[31m-    height: 100%;[m
+[31m-    top: 0px;[m
+[31m-    content: '';[m
+[31m-    background: #FFF;[m
+[31m-    opacity: 0.3;[m
+[31m-    transition: all 0.3s;[m
+[31m-}[m
+[31m-[m
+[31m-div.pullRightLeft a:before[m
+[31m-{[m
+[31m-    left: 0px;[m
+[31m-} [m
+[31m-[m
+[31m-div.pullRightLeft a:after[m
+[31m-{[m
+[31m-    right: 0px;[m
+[31m-}[m
+[31m-[m
+[31m-div.pullRightLeft a:hover:before, div.pullRightLeft a:hover:after[m
+[31m-{[m
+[31m-    width: 100%;[m
+[31m-}[m
+[31m-[m
+[31m-/* Highlight text out  */[m
+[31m-div.highlightTextOut a[m
+[31m-{[m
+[31m-    color: rgba(255, 255, 255, 0.3); [m
+[31m-}[m
+[31m-[m
+[31m-div.highlightTextOut a:before, div.highlightTextIn a:before[m
+[31m-{[m
+[31m-    position: absolute;[m
+[31m-    color: #FFF;[m
+[31m-    top: 0px;[m
+[31m-    left: 0px;[m
+[31m-    padding: 10px;[m
+[31m-    overflow: hidden;[m
+[31m-    content: attr(alt);[m
+[31m-    transition: all 0.3s;[m
+[31m-    transform: scale(0.8);[m
+[31m-    opacity: 0;[m
+[31m-} [m
+[31m-[m
+[31m-div.highlightTextOut a:hover:before, div.highlightTextIn a:hover:before[m
+[31m-{[m
+[31m-    transform: scale(1);[m
+[31m-    opacity: 1;[m
+[31m-}[m
+[31m-[m
+[31m-/* Highlight text in  */[m
+[31m-div.highlightTextIn a[m
+[31m-{[m
+[31m-    color: rgba(0, 0, 0, 0.4); [m
+[31m-}[m
+[31m-[m
+[31m-div.highlightTextIn a:before[m
+[31m-{[m
+[31m-    transform: scale(1.2);[m
+[31m-} [m
+\ No newline at end of file[m
+[1mdiff --git a/dialog/dialog.html b/dialog/dialog.html[m
+[1mdeleted file mode 100644[m
+[1mindex d60fceb..0000000[m
+[1m--- a/dialog/dialog.html[m
+[1m+++ /dev/null[m
+[36m@@ -1,160 +0,0 @@[m
+[31m-<!DOCTYPE html>[m
+[31m-<html lang="en">[m
+[31m-<head>[m
+[31m-  <meta charset="UTF-8">[m
+[31m-  <title>Title</title>[m
+[31m-  <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">[m
+[31m-  <style>[m
+[31m-    .customClass{[m
+[31m-[m
+[31m-    }[m
+[31m-  </style>[m
+[31m-</head>[m
+[31m-<body>[m
+[31m-[m
+[31m-<div id="app">[m
+[31m-  <el-button[m
+[31m-    type="primary"[m
+[31m-    size="small"[m
+[31m-    @click="dialogOpen(dialogOptions)"[m
+[31m-  >test</el-button>[m
+[31m-[m
+[31m-</div>[m
+[31m-[m
+[31m-<template id="TestDialog">[m
+[31m-  <div>[m
+[31m-    <p>{{ msg }}</p>[m
+[31m-[m
+[31m-    <div   class="dialog-footer" style="text-align:center;" >[m
+[31m-        <el-button @click="close">取 消</el-button>[m
+[31m-        <el-button type="primary"  >确 定</el-button>[m
+[31m-    </div>[m
+[31m-[m
+[31m-     <el-button[m
+[31m-      type="primary"[m
+[31m-      size="small"[m
+[31m-      @click="dialogOpen(dialogOptions)"[m
+[31m-    >test2</el-button>[m
+[31m-[m
+[31m-</div>[m
+[31m-  [m
+[31m-</template>[m
+[31m-[m
+[31m-[m
+[31m-<template id="TestDialogTwo">[m
+[31m-  <div>[m
+[31m-    <p>{{ msg }}</p>[m
+[31m-    <div  class="dialog-footer" style="text-align:center;" >[m
+[31m-        <el-button @click="close">取 消</el-button>[m
+[31m-        <el-button type="primary"  >确 定</el-button>[m
+[31m-    </div>[m
+[31m-</div>[m
+[31m-</template>[m
+[31m-[m
+[31m-[m
+[31m-<script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>[m
+[31m-<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>[m
+[31m-<script src="./dialog.js"></script>[m
+[31m-<script>[m
+[31m-[m
+[31m-  [m
+[31m-  let TestDialogTwo = {[m
+[31m-        template: '#TestDialogTwo',[m
+[31m-        props: {[m
+[31m-          msg: {[m
+[31m-            type: String,[m
+[31m-            default: ''[m
+[31m-          }[m
+[31m-        },[m
+[31m-        mounted:function(){[m
+[31m-            this.$parent.$emit('notData',300)[m
+[31m-        },[m
+[31m-        methods:{[m
+[31m-            close(){[m
+[31m-              this.$parent.$emit('update:visible', false);[m
+[31m-            }[m
+[31m-        }[m
+[31m-  }[m
+[31m-[m
+[31m-  let TestDialog =  {[m
+[31m-    template: '#TestDialog',[m
+[31m-    props: {[m
+[31m-      msg: {[m
+[31m-        type: String,[m
+[31m-        default: ''[m
+[31m-      }[m
+[31m-    },[m
+[31m-    data(){[m
+[31m-      return {[m
+[31m-        dialogOptions:{[m
+[31m-          options:{ // https://element.eleme.io/#/zh-CN/component/dialog    Attributes属性[m
+[31m-            title:'mytitel2',[m
+[31m-            closeOnClickModal:false[m
+[31m-            [m
+[31m-          },[m
+[31m-          bgImgSrc:'http://10.1.7.137:8080/jszsgxpt-static/b/moltran/assets/css/images/screen/pmbg.jpg',[m
+[31m-          componentName:TestDialogTwo, // 弹窗自定义组件名[m
+[31m-          componentData:{  //传递到弹窗组件数据[m
+[31m-            'msg': 'This is test msg two!'[m
+[31m-          }[m
+[31m-        }[m
+[31m-      }[m
+[31m-    },[m
+[31m-    mounted:function(){[m
+[31m-      console.log(this)[m
+[31m-    },[m
+[31m-    methods:{[m
+[31m-        close(){[m
+[31m-          this.$parent.$emit('update:visible', false);[m
+[31m-        }[m
+[31m-    }[m
+[31m-  };[m
+[31m-  var vm = new Vue({[m
+[31m-    el:'#app',[m
+[31m-    data(){[m
+[31m-      return {[m
+[31m-          dialogOptions:{[m
+[31m-            options:{ // https://element.eleme.io/#/zh-CN/component/dialog    Attributes属性[m
+[31m-              title:'mytitel',[m
+[31m-              closeOnClickModal:false,[m
+[31m-              beforeClose:function(done){[m
+[31m-                  console.log(126621)[m
+[31m-                  done()[m
+[31m-              }[m
+[31m-            },[m
+[31m-            componentName:TestDialog, // 自定义组件[m
+[31m-            componentData:{  //传递到弹窗组件数据[m
+[31m-              'msg': 'This is test msg!'[m
+[31m-            }[m
+[31m-          }[m
+[31m-      }[m
+[31m-    },[m
+[31m-    mounted(){[m
+[31m-    }[m
+[31m-  })[m
+[31m-[m
+[31m-  function Eat (){ return {a:2,b:3} }[m
+[31m-[m
+[31m-[m
+[31m-  Function.prototype.before = function (fn) {[m
+[31m-    return () => {[m
+[31m-      fn && fn(); [m
+[31m-      var result = this();[m
+[31m-      return result[m
+[31m-    }[m
+[31m-  }[m
+[31m-[m
+[31m-  Function.prototype.after = function (fn) {[m
+[31m-    return () => { [m
+[31m-      var result = this(); [m
+[31m-      fn && fn(); [m
+[31m-      return result[m
+[31m-    }[m
+[31m-  }[m
+[31m-[m
+[31m-  Eat.before(()=>console.log('before'))[m
+[31m-[m
+[31m-[m
+[31m-</script>[m
+[31m-</body>[m
+[31m-</html>[m
+[1mdiff --git a/dialog/dialog.js b/dialog/dialog.js[m
+[1mdeleted file mode 100644[m
+[1mindex e3d777e..0000000[m
+[1m--- a/dialog/dialog.js[m
+[1m+++ /dev/null[m
+[36m@@ -1,94 +0,0 @@[m
+[31m-(function(Vue,ELEMENT){[m
+[31m-	Vue.use(ELEMENT);[m
+[31m-[m
+[31m-	let notData = {[m
+[31m-      template:`<div [m
+[31m-        :style="{[m
+[31m-          'height':height+'px',[m
+[31m-          'min-height':'150px',[m
+[31m-          'width':'100%',[m
+[31m-          'display':'flex',[m
+[31m-          'flex-direction':'column'[m
+[31m-        }">[m
+[31m-          <div style="flex:1;width:100%;display:flex;justify-content:center;" >[m
+[31m-            <img style="width: 50%;height: auto;object-fit:contain;" src="http://10.1.7.137:8080/jszsgxpt-static/b/moltran/assets/css/images/screen/notData.png"/>[m
+[31m-          </div>[m
+[31m-          <p style="flex:1;text-align:center;width:100%;color: #3c71d3;font-size: 24px">暂无数据</p>[m
+[31m-        </div>`,[m
+[31m-      props:{[m
+[31m-        height:{[m
+[31m-          type:Number,[m
+[31m-          default:200[m
+[31m-        }[m
+[31m-      }[m
+[31m-    }[m
+[31m-[m
+[31m-    // 为 Vue 添加一个打开方法[m
+[31m-    Vue.mixin({[m
+[31m-      methods: {[m
+[31m-        dialogOpen(dialogOptions) {[m
+[31m-           [m
+[31m-           // 创建实例： Vue.extend 方法获得组件的构造主体， 构造主体通过 new 创建 Vue 组件实例[m
+[31m-          const vm = new (Vue.extend(ELEMENT.Dialog))()[m
+[31m-          [m
+[31m-          // 监听 visible 变更事件[m
+[31m-          vm.$on('update:visible', val => {[m
+[31m-            vm.visible = val[m
+[31m-            if(!val){[m
+[31m-               document.body.removeChild(vm.$el)[m
+[31m-            }[m
+[31m-          })[m
+[31m-         [m
+[31m-         [m
+[31m-          // 实例空挂载并将创建的元素放入 body 中[m
+[31m-          vm.$mount()[m
+[31m-        [m
+[31m-          let containDom = vm.$el.querySelector('.el-dialog');[m
+[31m-          let closeBtn = vm.$el.querySelector('.el-dialog__close');[m
+[31m-[m
+[31m-          Object.assign(closeBtn.style,{[m
+[31m-            'color':'#ffffff'[m
+[31m-          });[m
+[31m-         [m
+[31m-          let bgImgSrc = dialogOptions.bgImgSrc?dialogOptions.bgImgSrc:'http://10.1.7.137:8080/jszsgxpt-static/b/moltran/assets/css/images/screen/topbig.jpg'[m
+[31m-          Object.assign(containDom.style,{[m
+[31m-              'box-shadow': '2px 2px 5px #41baf1',[m
+[31m-              'border': '2px solid #41BAF1',[m
+[31m-              'border-radius': '10px',[m
+[31m-              'background-color': 'rgba(12,35,76,1)',[m
+[31m-              'background-image': 'url('+bgImgSrc+')',[m
+[31m-              'background-repeat': 'no-repeat',[m
+[31m-              'background-position': 'center',[m
+[31m-              'background-size': '100% 100%',[m
+[31m-              'color':'#ffffff',[m
+[31m-              'min-height':'450px'[m
+[31m-          })[m
+[31m-[m
+[31m-          document.body.appendChild(vm.$el)[m
+[31m-[m
+[31m-          Object.assign(vm,dialogOptions.options)[m
+[31m-[m
+[31m-          if(vm.title){[m
+[31m-              vm.$slots.title = vm.$createElement('div',[[m
+[31m-                  vm.$createElement('span',{'style':{'margin-right':'5px'}},vm.title),[m
+[31m-                  vm.$createElement('img',{'attrs':{ 'src':'http://10.1.7.137:8080/jszsgxpt-static/b/moltran/assets/css/images/screen/lefttip.png'}}),[m
+[31m-              ])[m
+[31m-          }[m
+[31m-          [m
+[31m-[m
+[31m-         let propsOptions = {'props':dialogOptions.componentData || {}}[m
+[31m-[m
+[31m-          // 创建内部元素并替换弹窗主体[m
+[31m-          vm.$slots.default = vm.$createElement(dialogOptions.componentName, propsOptions)[m
+[31m-          [m
+[31m-          vm.$on('notData',(val)=>{[m
+[31m-            vm.$slots.default = vm.$createElement(notData,{props:{height:val}})[m
+[31m-            vm.$forceUpdate()[m
+[31m-          })[m
+[31m-          // 打开弹窗[m
+[31m-          console.log(vm.$slots)[m
+[31m-          vm.visible = true[m
+[31m-        }[m
+[31m-      }[m
+[31m-    })[m
+[31m-})(Vue,ELEMENT)[m
+\ No newline at end of file[m
+[1mdiff --git a/dialog/star.html b/dialog/star.html[m
+[1mdeleted file mode 100644[m
+[1mindex 0fdd07d..0000000[m
+[1m--- a/dialog/star.html[m
+[1m+++ /dev/null[m
+[36m@@ -1,110 +0,0 @@[m
+[31m-<!DOCTYPE html>[m
+[31m-<html lang="en">[m
+[31m-<head>[m
+[31m-  <meta charset="UTF-8">[m
+[31m-  <title>Title</title>[m
+[31m-  <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">[m
+[31m-  <style>[m
+[31m-    .main{[m
+[31m-		position:relative;[m
+[31m-	}[m
+[31m-	.star_line{[m
+[31m-		/*  设置强制不换行 */[m
+[31m-		width-space: nowrap;[m
+[31m-		overflow: hidden;[m
+[31m-		position: absolute;[m
+[31m-	}[m
+[31m-	.star{[m
+[31m-		display: inline-block;[m
+[31m-		/* 设置当鼠标放到星星上是变成小手样式 */[m
+[31m-		cursor: pointer[m
+[31m-	}[m
+[31m-[m
+[31m-  </style>[m
+[31m-</head>[m
+[31m-<body>[m
+[31m-[m
+[31m-<div id="app">[m
+[31m-[m
+[31m-<v-star :score="1.5" disabled/>[m
+[31m-<v-star :score="3.6" disabled showText/>[m
+[31m-<v-star :score.sync="curScore" showText/>[m
+[31m-[m
+[31m-<template id="v-star">[m
+[31m-   <div class="rate" :class="{'disabled':disabled}">[m
+[31m-    <i v-for="i in 5" [m
+[31m-    class="iconfont" [m
+[31m-    @mouseenter="disabled?'':curScore=i" [m
+[31m-    @mouseleave="disabled?'':curScore=''" [m
+[31m-    @click="disabled?'':setScore(i)" [m
+[31m-    :class="getClass(i)">[m
+[31m-      [m
+[31m-      <i v-if="disabled && i==Math.floor(score)+1" class="iconfont icon-star" :style="'width:'+width"></i>[m
+[31m-    </i>[m
+[31m-    <span v-if="showText" class="text">{{curScore||score}}分</span>[m
+[31m-  </div>[m
+[31m-</template>[m
+[31m-</div>[m
+[31m-[m
+[31m-[m
+[31m-<script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>[m
+[31m-<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>[m
+[31m-[m
+[31m-<script>[m
+[31m-[m
+[31m- Vue.component("v-star",{[m
+[31m-        template:"#v-star",[m
+[31m-        name:'vStar',[m
+[31m-	    props: {[m
+[31m-	      score: {[m
+[31m-	        type: Number,[m
+[31m-	        default: 0,[m
+[31m-	        //required: true[m
+[31m-	      },[m
+[31m-	      disabled: {[m
+[31m-	        type: Boolean,[m
+[31m-	        default: false,[m
+[31m-	      },[m
+[31m-	      showText: {[m
+[31m-	        type: Boolean,[m
+[31m-	        default: false,[m
+[31m-	      },[m
+[31m-	    },[m
+[31m-	    data() {[m
+[31m-	      return {[m
+[31m-	        curScore: '',[m
+[31m-	        width:'',[m
+[31m-	      }[m
+[31m-	    },[m
+[31m-	    created: function () {[m
+[31m-	      this.getDecimal();[m
+[31m-	    },[m
+[31m-	    methods: {[m
+[31m-	      getClass(i) {[m
+[31m-	        if (this.curScore === '') {[m
+[31m-	          return i <= this.score ? 'icon-star' : 'icon-star-o'[m
+[31m-	        } else {[m
+[31m-	          return i <= this.curScore ? 'icon-star' : 'icon-star-o'[m
+[31m-	        }[m
+[31m-	      },[m
+[31m-	      getDecimal() {[m
+[31m-	        this.width=Number(this.score * 100 - Math.floor(this.score) * 100)+'%';[m
+[31m-	      },[m
+[31m-	      setScore(i){[m
+[31m-	        this.$emit('update:score',i);//使用`.sync`修饰符，对score 进行“双向绑定[m
+[31m-	      }[m
+[31m-	    }[m
+[31m-	})[m
+[31m-var vm = new Vue({[m
+[31m-	    el:'#app',[m
+[31m-	    data(){[m
+[31m-	      return {[m
+[31m-	           curScore:3.3[m
+[31m-	      }[m
+[31m-	    },[m
+[31m-	    mounted(){[m
+[31m-	    }[m
+[31m-  })[m
+[31m-</script>[m
+[31m-</body>[m
+[31m-</html>[m
+[1mdiff --git a/poper.html b/poper.html[m
+[1mdeleted file mode 100644[m
+[1mindex ad02bb2..0000000[m
+[1m--- a/poper.html[m
+[1m+++ /dev/null[m
+[36m@@ -1,154 +0,0 @@[m
+[31m-<!DOCTYPE html>[m
+[31m-<html>[m
+[31m-[m
+[31m-<head>[m
+[31m-    <title>Popper Tutorial</title>[m
+[31m-    <style>[m
+[31m-        #tooltip {[m
+[31m-            background: #333;[m
+[31m-            color: white;[m
+[31m-            font-weight: bold;[m
+[31m-            padding: 4px 8px;[m
+[31m-            font-size: 13px;[m
+[31m-            border-radius: 4px;[m
+[31m-            display: none;[m
+[31m-        }[m
+[31m-        [m
+[31m-        #tooltip[data-show] {[m
+[31m-            display: block;[m
+[31m-        }[m
+[31m-        [m
+[31m-        #arrow,[m
+[31m-        #arrow::before {[m
+[31m-            position: absolute;[m
+[31m-            width: 8px;[m
+[31m-            height: 8px;[m
+[31m-            background: inherit;[m
+[31m-        }[m
+[31m-        [m
+[31m-        #arrow {[m
+[31m-            visibility: hidden;[m
+[31m-        }[m
+[31m-        [m
+[31m-        #arrow::before {[m
+[31m-            visibility: visible;[m
+[31m-            content: '';[m
+[31m-            transform: rotate(45deg);[m
+[31m-        }[m
+[31m-        [m
+[31m-        #tooltip[data-popper-placement^='top']>#arrow {[m
+[31m-            bottom: -4px;[m
+[31m-        }[m
+[31m-        [m
+[31m-        #tooltip[data-popper-placement^='bottom']>#arrow {[m
+[31m-            top: -4px;[m
+[31m-        }[m
+[31m-        [m
+[31m-        #tooltip[data-popper-placement^='left']>#arrow {[m
+[31m-            right: -4px;[m
+[31m-        }[m
+[31m-        [m
+[31m-        #tooltip[data-popper-placement^='right']>#arrow {[m
+[31m-            left: -4px;[m
+[31m-        }[m
+[31m-    </style>[m
+[31m-</head>[m
+[31m-[m
+[31m-<body>[m
+[31m-    <button id="button" aria-describedby="tooltip">My button</button>[m
+[31m-[m
+[31m-    <div id="tooltip" role="tooltip">[m
+[31m-        <div>My tooltipMy tooltipMy tooltipMy tooltip</div>[m
+[31m-        <div id="arrow" data-popper-arrow></div>[m
+[31m-    </div>[m
+[31m-[m
+[31m-    <script src="https://unpkg.com/@popperjs/core@2"></script>[m
+[31m-    <script>[m
+[31m-        const button = document.querySelector('#button');[m
+[31m-        const tooltip = document.querySelector('#tooltip');[m
+[31m-[m
+[31m-        const popperInstance = Popper.createPopper(button, tooltip, {[m
+[31m-            modifiers: [{[m
+[31m-                name: 'offset',[m
+[31m-                options: {[m
+[31m-                    offset: [0, 18],[m
+[31m-                },[m
+[31m-            }, ],[m
+[31m-        });[m
+[31m-[m
+[31m-        function show() {[m
+[31m-            // Make the tooltip visible[m
+[31m-            tooltip.setAttribute('data-show', '');[m
+[31m-[m
+[31m-            // Enable the event listeners[m
+[31m-            popperInstance.setOptions({[m
+[31m-                modifiers: [{[m
+[31m-                    name: 'eventListeners',[m
+[31m-                    enabled: true[m
+[31m-                }, {[m
+[31m-                    name: 'offset',[m
+[31m-                    options: {[m
+[31m-                        offset: [0, 10],[m
+[31m-                    },[m
+[31m-                }],[m
+[31m-            });[m
+[31m-[m
+[31m-            // Update its position[m
+[31m-            popperInstance.update();[m
+[31m-        }[m
+[31m-[m
+[31m-        function hide() {[m
+[31m-            // Hide the tooltip[m
+[31m-            tooltip.removeAttribute('data-show');[m
+[31m-[m
+[31m-            // Disable the event listeners[m
+[31m-            popperInstance.setOptions({[m
+[31m-                modifiers: [{[m
+[31m-                    name: 'eventListeners',[m
+[31m-                    enabled: false[m
+[31m-                }],[m
+[31m-            });[m
+[31m-        }[m
+[31m-[m
+[31m-        const showEvents = ['mouseenter', 'focus'];[m
+[31m-        const hideEvents = ['mouseleave', 'blur'];[m
+[31m-[m
+[31m-        showEvents.forEach(event => {[m
+[31m-            button.addEventListener(event, show);[m
+[31m-        });[m
+[31m-[m
+[31m-        hideEvents.forEach(event => {[m
+[31m-            button.addEventListener(event, hide);[m
+[31m-        });[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-        function generateGetBoundingClientRect(x = 0, y = 0) {[m
+[31m-            return () => ({[m
+[31m-                width: 0,[m
+[31m-                height: 0,[m
+[31m-                top: y,[m
+[31m-                right: x,[m
+[31m-                bottom: y,[m
+[31m-                left: x,[m
+[31m-            });[m
+[31m-        }[m
+[31m-[m
+[31m-        const virtualElement = {[m
+[31m-            getBoundingClientRect: generateGetBoundingClientRect(),[m
+[31m-        };[m
+[31m-[m
+[31m-        const instance = Popper.createPopper(virtualElement, Popper);[m
+[31m-[m
+[31m-        document.addEventListener('mousemove', ({[m
+[31m-            clientX: x,[m
+[31m-            clientY: y[m
+[31m-        }) => {[m
+[31m-            virtualElement.getBoundingClientRect = generateGetBoundingClientRect(x, y);[m
+[31m-            instance.update();[m
+[31m-        });[m
+[31m-    </script>[m
+[31m-</body>[m
+[31m-[m
+[31m-</html>[m
+\ No newline at end of file[m
+[1mdiff --git a/star/index.html b/star/index.html[m
+[1mdeleted file mode 100644[m
+[1mindex af5d78a..0000000[m
+[1m--- a/star/index.html[m
+[1m+++ /dev/null[m
+[36m@@ -1,115 +0,0 @@[m
+[31m-<!DOCTYPE html>[m
+[31m-<html lang="en">[m
+[31m-<head>[m
+[31m-  <meta charset="UTF-8">[m
+[31m-  <title>Title</title>[m
+[31m-  <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">[m
+[31m-  <style>[m
+[31m-[m
+[31m-[m
+[31m-  </style>[m
+[31m-</head>[m
+[31m-<body>[m
+[31m-[m
+[31m-<div id="app">[m
+[31m-[m
+[31m-	<bw-star :value="score" :img-src="'./p1.png'" :img-a-src="'./p2.png'"></bw-star>[m
+[31m-	{{ score }}[m
+[31m-[m
+[31m-	[m
+[31m-</div>[m
+[31m-[m
+[31m-<template id="bw-star">[m
+[31m-	<div  [m
+[31m-	:style="{[m
+[31m-		'position': 'relative',[m
+[31m-    	'width': imgW * count + 'px',[m
+[31m-    	'height': imgH + 'px',[m
+[31m-    	'background': 'pink',[m
+[31m-    	'background-image': 'url('+ imgSrc +')',[m
+[31m-    	'background-position': imgPosition,[m
+[31m-    	'background-repeat': 'repeat',[m
+[31m-	}">[m
+[31m-		<div [m
+[31m-			:style="{[m
+[31m-			'position': 'relative',[m
+[31m-	    	'width': imgW * value  + 'px',[m
+[31m-	    	'height': imgH + 'px',[m
+[31m-	    	'background': 'pink',[m
+[31m-	    	'background-image': 'url('+ imgASrc +')',[m
+[31m-	    	'background-position': imgPosition,[m
+[31m-	    	'background-repeat': 'repeat',[m
+[31m-		}"></div>[m
+[31m-	</div>[m
+[31m-</template>[m
+[31m-[m
+[31m-[m
+[31m-<script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>[m
+[31m-<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>[m
+[31m-[m
+[31m-<script>[m
+[31m-Vue.component('BwStar',{[m
+[31m-	template:'#bw-star',[m
+[31m-	props:{[m
+[31m-		count:{[m
+[31m-			type:Number,[m
+[31m-			default:10[m
+[31m-		},[m
+[31m-		value:{[m
+[31m-			type:Number,[m
+[31m-			default:10[m
+[31m-		},[m
+[31m-		imgSrc:{[m
+[31m-			type:String,[m
+[31m-			required:true[m
+[31m-		},[m
+[31m-		imgASrc:{[m
+[31m-			type:String,[m
+[31m-			required:true[m
+[31m-		}[m
+[31m-	},[m
+[31m-	computed:{[m
+[31m-    	imgPosition(){[m
+[31m-    		return `${this.imgW} px   ${this.imgH} 'px'`[m
+[31m-    	}[m
+[31m-    },[m
+[31m-	data(){[m
+[31m-		return {[m
+[31m-			imgW:0,[m
+[31m-	      	imgH:0,[m
+[31m-		}[m
+[31m-	},[m
+[31m-	mounted(){[m
+[31m-		this.init()[m
+[31m-	},[m
+[31m-	methods:{[m
+[31m-		init(){[m
+[31m-			let img = new Image();[m
+[31m-	    	img.onload = (e) =>{[m
+[31m-	    		this.imgW = img.width;[m
+[31m-	    		this.imgH = img.height;[m
+[31m-	    	}[m
+[31m-	    	img.src = this.imgSrc[m
+[31m-		}[m
+[31m-	}[m
+[31m-})[m
+[31m- [m
+[31m-var vm = new Vue({[m
+[31m-	    el:'#app',[m
+[31m-	    data(){[m
+[31m-	      	return {[m
+[31m-	      		score:1.2[m
+[31m-	      	}[m
+[31m-	    },[m
+[31m-	    computed:{[m
+[31m-	    	[m
+[31m-	    },[m
+[31m-	    mounted(){[m
+[31m-	    	setInterval(()=>{[m
+[31m-	    		this.score = Math.random() * 10[m
+[31m-	    	}, 1000)[m
+[31m-	    }[m
+[31m-  })[m
+[31m-</script>[m
+[31m-</body>[m
+[31m-</html>[m
+[1mdiff --git a/star/index2.html b/star/index2.html[m
+[1mdeleted file mode 100644[m
+[1mindex ddcd786..0000000[m
+[1m--- a/star/index2.html[m
+[1m+++ /dev/null[m
+[36m@@ -1,143 +0,0 @@[m
+[31m-<!DOCTYPE html>[m
+[31m-<html lang="en">[m
+[31m-<head>[m
+[31m-  <meta charset="UTF-8">[m
+[31m-  <title>Title</title>[m
+[31m-  <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.12.0/theme-chalk/index.css">[m
+[31m-  <style>[m
+[31m-[m
+[31m-[m
+[31m-  </style>[m
+[31m-</head>[m
+[31m-<body>[m
+[31m-[m
+[31m-<div id="app">[m
+[31m-[m
+[31m-	<bw-star :value="score" :img-src="'./p1.png'" :img-a-src="'./p2.png'"></bw-star>[m
+[31m-	{{ score }}[m
+[31m-	<bw-star :value="score" :img-src="'./p1.png'" :direction = "0" :img-a-src="'./p2.png'"></bw-star>[m
+[31m-	{{ score }}[m
+[31m-	<bw-star :value="score2" :count = "1" :img-src="'./p1.png'" :direction = "0" :img-a-src="'./p2.png'"></bw-star>[m
+[31m-	[m
+[31m-</div>[m
+[31m-[m
+[31m-<template id="bw-star">[m
+[31m-	<div  [m
+[31m-	:style="{[m
+[31m-		'position': 'relative',[m
+[31m-    	'width': PWidth  + 'px',[m
+[31m-    	'height': PHeight + 'px',[m
+[31m-    	'background': 'pink',[m
+[31m-    	'background-image': 'url('+ imgSrc +')',[m
+[31m-    	'background-position': imgPosition,[m
+[31m-    	'background-repeat': 'repeat',[m
+[31m-	}">[m
+[31m-		<div [m
+[31m-			:style="{[m
+[31m-			'position': 'relative',[m
+[31m-	    	'width': CWidth   + 'px',[m
+[31m-	    	'height': CHeight + 'px',[m
+[31m-	    	'background': 'pink',[m
+[31m-	    	'background-image': 'url('+ imgASrc +')',[m
+[31m-	    	'background-position': imgPosition,[m
+[31m-	    	'background-repeat': 'repeat',[m
+[31m-		}"></div>[m
+[31m-	</div>[m
+[31m-</template>[m
+[31m-[m
+[31m-[m
+[31m-<script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>[m
+[31m-<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>[m
+[31m-[m
+[31m-<script>[m
+[31m-Vue.component('BwStar',{[m
+[31m-	template:'#bw-star',[m
+[31m-	props:{[m
+[31m-		count:{[m
+[31m-			type:Number,[m
+[31m-			default:10,[m
+[31m-			validator (value) {[m
+[31m-      			return (value >= 1)[m
+[31m-      		}[m
+[31m-		},[m
+[31m-		direction :{[m
+[31m-			type: Number,[m
+[31m-			default: 1[m
+[31m-		},[m
+[31m-		value:{[m
+[31m-			type:Number,[m
+[31m-			default:0,[m
+[31m-			validator (value) {[m
+[31m-      			return (value < this.count)[m
+[31m-      		}	[m
+[31m-		},[m
+[31m-		imgSrc:{[m
+[31m-			type:String,[m
+[31m-			required:true[m
+[31m-		},[m
+[31m-		imgASrc:{[m
+[31m-			type:String,[m
+[31m-			required:true[m
+[31m-		}[m
+[31m-	},[m
+[31m-	computed:{[m
+[31m-		PWidth(){[m
+[31m-			return this.direction ? ( this.imgW * this.count) : this.imgW[m
+[31m-		},[m
+[31m-		PHeight(){[m
+[31m-			return !this.direction ? ( this.imgH * this.count) : this.imgH[m
+[31m-		},[m
+[31m-		CWidth(){[m
+[31m-			return this.direction ? ( this.imgW * this.value) : this.imgW[m
+[31m-		},[m
+[31m-		CHeight(){[m
+[31m-			return !this.direction ? ( this.imgH * this.value) : this.imgH[m
+[31m-		},[m
+[31m-    	imgPosition(){[m
+[31m-    		return `${this.imgW} px   ${this.imgH} 'px'`[m
+[31m-    	}[m
+[31m-    },[m
+[31m-	data(){[m
+[31m-		return {[m
+[31m-			imgW:0,[m
+[31m-	      	imgH:0,[m
+[31m-		}[m
+[31m-	},[m
+[31m-	mounted(){[m
+[31m-		this.init()[m
+[31m-	},[m
+[31m-	methods:{[m
+[31m-		init(){[m
+[31m-			let img = new Image();[m
+[31m-	    	img.onload = (e) =>{[m
+[31m-	    		this.imgW = img.width;[m
+[31m-	    		this.imgH = img.height;[m
+[31m-	    	}[m
+[31m-	    	img.src = this.imgSrc[m
+[31m-		}[m
+[31m-	}[m
+[31m-})[m
+[31m- [m
+[31m-var vm = new Vue({[m
+[31m-	    el:'#app',[m
+[31m-	    data(){[m
+[31m-	      	return {[m
+[31m-	      		score:0.5,[m
+[31m-	      		score2:0.1[m
+[31m-	      	}[m
+[31m-	    },[m
+[31m-	    computed:{[m
+[31m-	    	[m
+[31m-	    },[m
+[31m-	    mounted(){[m
+[31m-	    	setInterval(()=>{[m
+[31m-	    		this.score = Math.random() * 10[m
+[31m-	    	}, 1000)[m
+[31m-	    	setInterval(()=>{[m
+[31m-	    		this.score2 = Math.random() [m
+[31m-	    	}, 1000)[m
+[31m-	    }[m
+[31m-  })[m
+[31m-</script>[m
+[31m-</body>[m
+[31m-</html>[m
+[1mdiff --git a/star/p1.png b/star/p1.png[m
+[1mdeleted file mode 100644[m
+[1mindex f38e5d6..0000000[m
+Binary files a/star/p1.png and /dev/null differ
+[1mdiff --git a/star/p2.png b/star/p2.png[m
+[1mdeleted file mode 100644[m
+[1mindex bc1c97c..0000000[m
+Binary files a/star/p2.png and /dev/null differ
+[1mdiff --git a/star/per1.png b/star/per1.png[m
+[1mdeleted file mode 100644[m
+[1mindex f38e5d6..0000000[m
+Binary files a/star/per1.png and /dev/null differ
+[1mdiff --git a/star/per2.png b/star/per2.png[m
+[1mdeleted file mode 100644[m
+[1mindex bc1c97c..0000000[m
+Binary files a/star/per2.png and /dev/null differ

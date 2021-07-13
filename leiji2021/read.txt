@@ -1,0 +1,17 @@
+this.audioService = new SpeechSynthesisUtterance()
+this.audioService.text = '中国对测试打发撒旦发射点阿斯顿发顺丰大撒旦发生发射点阿迪斯发书法大赛得分'
+this.audioService.lang = 'zh-CN'
+this.audioService.volume = '1'
+this.audioService.pitch = 1
+this.audioService.rate = 1
+window.speechSynthesis.speak(this.audioService)
+
+
+1、负责项目前端设计与开发计划的制定、指导、检查及督促执行； 2、根据项目进度和任务分配完成项目前端页面开发，配合进行项目页面测试和质量检查问题对应工作； 3、组织梳理交互设计规范并负责维护和实施； 4、负责公司项目通用组件前端方面的设计、开发、维护、及应用监督工作； 5、协助各项目部门在项目研发过程中前端技术难点的攻关 项目可用性研究： 正对项目可用性提出意见及解决方案 系统性能优化： 对项目前
+1、对页面布局有一定的规划和设计思想，对页面效果有自己的见解； 2、编码风格良好，代码整洁，面向对象编程思想； 3、技术多样性，能胜任PC端和移动端的开发，根据项目情况对网站进行性能优化，并完善现有技术体系； 4、统一可重用组件，规范前端模块化开发
+1、根据需求和原型完成页面的开发； 2、页面能高度还原效果图设计的效果，保证页面的美观度； 3、前后端联调保证功能流畅
+
+
+
+
+  background: repeating-linear-gradient(-45deg, #ff6c6c 0, #ff6c6c 20%, transparent 0, transparent 25%, #1989fa 0, #1989fa 45%, transparent 0, transparent 50%)
